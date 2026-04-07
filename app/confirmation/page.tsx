@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, Clock, Calendar, Users, QrCode } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
 interface SlotAssignment {
@@ -25,7 +25,7 @@ interface RegistrationDetails {
   slots: SlotAssignment[];
 }
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const searchParams = useSearchParams();
   const registrationNumber = searchParams.get('reg');
   const [details, setDetails] = useState<RegistrationDetails | null>(null);
@@ -251,6 +251,20 @@ export default function ConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ConfirmationContent />
+    </Suspense>
   );
 }
 
