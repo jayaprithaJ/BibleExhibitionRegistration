@@ -32,10 +32,19 @@ export async function GET() {
       ORDER BY s.slot_date, s.slot_time, sa.group_sequence`
     );
 
-    return NextResponse.json({
-      success: true,
-      batches,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        batches,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error fetching batches:', error);
     return NextResponse.json(

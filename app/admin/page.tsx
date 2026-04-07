@@ -372,19 +372,49 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Registrations List */}
+        {/* Batch/Registration View */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              All Registrations
-              <span className="text-sm font-normal text-gray-500 ml-2">
-                ({filteredStats.total} of {registrations.length})
-              </span>
-            </h2>
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {viewMode === 'batches' ? 'Batch View' : 'Registration View'}
+                <span className="text-sm font-normal text-gray-500 ml-2">
+                  {viewMode === 'batches'
+                    ? `(${filteredBatchStats.total} of ${batches.length} batches)`
+                    : `(${filteredStats.total} of ${registrations.length} registrations)`
+                  }
+                </span>
+              </h2>
+              <div className="flex gap-2 border border-gray-300 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('batches')}
+                  className={`flex items-center gap-2 px-3 py-1 rounded transition-colors ${
+                    viewMode === 'batches'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Layers className="w-4 h-4" />
+                  Batches
+                </button>
+                <button
+                  onClick={() => setViewMode('registrations')}
+                  className={`flex items-center gap-2 px-3 py-1 rounded transition-colors ${
+                    viewMode === 'registrations'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                  Registrations
+                </button>
+              </div>
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={() => {
                   fetchRegistrations();
+                  fetchBatches();
                   fetchStats();
                 }}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -394,38 +424,50 @@ export default function AdminPage() {
                 Refresh
               </button>
               <button
-                onClick={() => setShowRegistrations(!showRegistrations)}
+                onClick={() => {
+                  if (viewMode === 'batches') {
+                    setShowBatches(!showBatches);
+                  } else {
+                    setShowRegistrations(!showRegistrations);
+                  }
+                }}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <List className="w-4 h-4" />
-                {showRegistrations ? 'Hide' : 'Show'} List
+                {(viewMode === 'batches' ? showBatches : showRegistrations) ? 'Hide' : 'Show'} List
               </button>
             </div>
           </div>
 
           {/* Filter Stats */}
-          {showRegistrations && (
+          {(showRegistrations || showBatches) && (
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <span className="font-semibold text-green-900">Completed</span>
                 </div>
-                <p className="text-2xl font-bold text-green-600">{filteredStats.completed}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {viewMode === 'batches' ? filteredBatchStats.completed : filteredStats.completed}
+                </p>
               </div>
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <Clock className="w-5 h-5 text-yellow-600" />
                   <span className="font-semibold text-yellow-900">Pending</span>
                 </div>
-                <p className="text-2xl font-bold text-yellow-600">{filteredStats.pending}</p>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {viewMode === 'batches' ? filteredBatchStats.pending : filteredStats.pending}
+                </p>
               </div>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <Users className="w-5 h-5 text-blue-600" />
                   <span className="font-semibold text-blue-900">Total People</span>
                 </div>
-                <p className="text-2xl font-bold text-blue-600">{filteredStats.totalPeople}</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {viewMode === 'batches' ? filteredBatchStats.totalPeople : filteredStats.totalPeople}
+                </p>
               </div>
             </div>
           )}

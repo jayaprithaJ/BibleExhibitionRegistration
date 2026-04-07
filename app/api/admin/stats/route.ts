@@ -56,21 +56,30 @@ export async function GET() {
       ORDER BY s.slot_date`
     );
 
-    return NextResponse.json({
-      success: true,
-      stats: {
-        totalRegistrations: registrationStats[0].total_registrations,
-        todayRegistrations: registrationStats[0].today_registrations,
-        totalPeople: registrationStats[0].total_people,
-        totalCapacity: slotStats[0].total_capacity,
-        filledCapacity: slotStats[0].filled_capacity,
-        availableCapacity: slotStats[0].available_capacity,
-        fillPercentage: slotStats[0].total_capacity > 0 
-          ? ((slotStats[0].filled_capacity / slotStats[0].total_capacity) * 100).toFixed(1)
-          : 0,
+    return NextResponse.json(
+      {
+        success: true,
+        stats: {
+          totalRegistrations: registrationStats[0].total_registrations,
+          todayRegistrations: registrationStats[0].today_registrations,
+          totalPeople: registrationStats[0].total_people,
+          totalCapacity: slotStats[0].total_capacity,
+          filledCapacity: slotStats[0].filled_capacity,
+          availableCapacity: slotStats[0].available_capacity,
+          fillPercentage: slotStats[0].total_capacity > 0
+            ? ((slotStats[0].filled_capacity / slotStats[0].total_capacity) * 100).toFixed(1)
+            : 0,
+        },
+        dateBreakdown,
       },
-      dateBreakdown,
-    });
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error fetching admin stats:', error);
     return NextResponse.json(

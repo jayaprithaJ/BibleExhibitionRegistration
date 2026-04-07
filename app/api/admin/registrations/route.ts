@@ -50,10 +50,19 @@ export async function GET() {
       ORDER BY r.created_at DESC`
     );
 
-    return NextResponse.json({
-      success: true,
-      registrations,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        registrations,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error fetching registrations:', error);
     return NextResponse.json(
