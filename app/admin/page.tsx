@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Users, Calendar, TrendingUp, Clock, RefreshCw, Trash2, List, Filter, CheckCircle, XCircle, Layers } from 'lucide-react';
+import Link from 'next/link';
+import { Users, Calendar, TrendingUp, Clock, RefreshCw, Trash2, List, Filter, CheckCircle, XCircle, Layers, Settings } from 'lucide-react';
 
 interface DateBreakdown {
   slot_date: string;
@@ -74,7 +75,12 @@ export default function AdminPage() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/stats');
+      const response = await fetch('/api/admin/stats', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
       const data = await response.json();
       if (data.success) {
         setStats(data.stats);
@@ -89,7 +95,12 @@ export default function AdminPage() {
 
   const fetchRegistrations = async () => {
     try {
-      const response = await fetch('/api/admin/registrations');
+      const response = await fetch('/api/admin/registrations', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
       const data = await response.json();
       if (data.success) {
         setRegistrations(data.registrations);
@@ -101,7 +112,12 @@ export default function AdminPage() {
 
   const fetchBatches = async () => {
     try {
-      const response = await fetch('/api/admin/batches');
+      const response = await fetch('/api/admin/batches', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
       const data = await response.json();
       if (data.success) {
         setBatches(data.batches);
@@ -261,14 +277,23 @@ export default function AdminPage() {
           <h1 className="text-3xl font-bold text-gray-900">
             Admin Dashboard
           </h1>
-          <button
-            onClick={fetchStats}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <div className="flex gap-2">
+            <Link
+              href="/admin/settings"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              Settings
+            </Link>
+            <button
+              onClick={fetchStats}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -412,16 +437,21 @@ export default function AdminPage() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => {
-                  fetchRegistrations();
-                  fetchBatches();
-                  fetchStats();
+                onClick={async () => {
+                  setLoading(true);
+                  await Promise.all([
+                    fetchRegistrations(),
+                    fetchBatches(),
+                    fetchStats(),
+                  ]);
+                  setLoading(false);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 title="Refresh data"
               >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Refreshing...' : 'Refresh'}
               </button>
               <button
                 onClick={() => {
@@ -473,7 +503,7 @@ export default function AdminPage() {
           )}
 
           {/* Filters */}
-          {showRegistrations && (
+          {(showRegistrations || showBatches) && (
             <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex items-center gap-2 mb-4">
                 <Filter className="w-5 h-5 text-gray-600" />
@@ -566,7 +596,75 @@ export default function AdminPage() {
             </div>
           )}
 
-          {showRegistrations && (
+          {/* Batch View Table */}
+          {showBatches && viewMode === 'batches' && (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b-2 border-gray-200">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
+                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Batch #</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Church</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Time</th>
+                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Language</th>
+                    <th className="text-center py-3 px-4 font-semibold text-gray-700">People</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Reg #</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBatches.map((batch) => (
+                    <tr key={`${batch.registration_id}-${batch.group_sequence}`} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4">
+                        {batch.checked_in ? (
+                          <div className="flex items-center gap-1 text-green-600">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="text-xs font-medium">Completed</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 text-yellow-600">
+                            <Clock className="w-4 h-4" />
+                            <span className="text-xs font-medium">Pending</span>
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold">
+                          {batch.group_sequence}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 font-medium">{batch.church_name}</td>
+                      <td className="py-3 px-4">{formatDate(batch.slot_date)}</td>
+                      <td className="py-3 px-4">
+                        <span className="font-semibold text-blue-600">{formatTime(batch.slot_time)}</span>
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span className={`inline-block px-2 py-1 rounded text-xs font-medium capitalize ${
+                          batch.language === 'tamil'
+                            ? 'bg-orange-100 text-orange-700'
+                            : 'bg-purple-100 text-purple-700'
+                        }`}>
+                          {batch.language}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-center font-semibold">{batch.people_count}</td>
+                      <td className="py-3 px-4 font-mono text-xs text-gray-600">{batch.registration_number}</td>
+                    </tr>
+                  ))}
+                  {filteredBatches.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-gray-500">
+                        {batches.length === 0 ? 'No batches found' : 'No batches match the selected filters'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Registration View Table */}
+          {showRegistrations && viewMode === 'registrations' && (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
