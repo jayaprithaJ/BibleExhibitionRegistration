@@ -1,8 +1,8 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, Users, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Clock, Users, CheckCircle, XCircle, Shield } from 'lucide-react';
 
 interface SlotInfo {
   language: string;
@@ -26,10 +26,15 @@ interface RegistrationInfo {
 
 export default function QRViewPage() {
   const params = useParams();
+  const router = useRouter();
   const token = params.token as string;
   const [registration, setRegistration] = useState<RegistrationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAdminPrompt, setShowAdminPrompt] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [checkingIn, setCheckingIn] = useState(false);
+  const [checkInError, setCheckInError] = useState<string | null>(null);
 
   useEffect(() => {
     if (token) {
@@ -66,6 +71,43 @@ export default function QRViewPage() {
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
     return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  const handleAdminCheckIn = async () => {
+    if (!adminPassword.trim()) {
+      setCheckInError('Please enter admin password');
+      return;
+    }
+
+    setCheckingIn(true);
+    setCheckInError(null);
+
+    try {
+      const response = await fetch('/api/checkin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          registration_number: registration?.registration_number,
+          admin_password: adminPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Refresh the page to show updated check-in status
+        window.location.reload();
+      } else {
+        setCheckInError(data.error || 'Failed to check in');
+      }
+    } catch (error) {
+      console.error('Check-in error:', error);
+      setCheckInError('Failed to check in. Please try again.');
+    } finally {
+      setCheckingIn(false);
+    }
   };
 
   if (loading) {
@@ -213,13 +255,82 @@ export default function QRViewPage() {
             <h3 className="font-semibold text-gray-900 mb-3">Important Instructions:</h3>
             <ul className="list-disc list-inside text-sm text-gray-600 space-y-2">
               <li>Arrive 10 minutes before your scheduled time</li>
-              <li>Present this QR code at the entrance for check-in</li>
+              <li>Save this confirmation on your mobile device or take a screenshot</li>
+              <li>Show your registration number or QR code at entry</li>
               <li>Audio guides will be provided in your selected language</li>
               {registration.slots.length > 1 && (
                 <li>Your group is split into {registration.slots.length} batches - call each batch at their designated time</li>
               )}
             </ul>
           </div>
+
+          {/* Admin Check-in Section */}
+          {!registration.checked_in && (
+            <div className="mt-6 border-t pt-6">
+              {!showAdminPrompt ? (
+                <button
+                  onClick={() => setShowAdminPrompt(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                >
+                  <Shield className="w-4 h-4" />
+                  Admin: Mark as Completed
+                </button>
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Shield className="w-5 h-5" />
+                    Admin Check-in
+                  </h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label htmlFor="admin-password" className="block text-sm font-medium text-gray-700 mb-1">
+                        Admin Password
+                      </label>
+                      <input
+                        id="admin-password"
+                        type="password"
+                        value={adminPassword}
+                        onChange={(e) => setAdminPassword(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleAdminCheckIn();
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter admin password"
+                        disabled={checkingIn}
+                      />
+                    </div>
+                    {checkInError && (
+                      <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
+                        {checkInError}
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleAdminCheckIn}
+                        disabled={checkingIn}
+                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                      >
+                        {checkingIn ? 'Checking in...' : 'Complete Check-in'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowAdminPrompt(false);
+                          setAdminPassword('');
+                          setCheckInError(null);
+                        }}
+                        disabled={checkingIn}
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

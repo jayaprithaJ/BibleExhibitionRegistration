@@ -47,12 +47,12 @@ function ConfirmationContent() {
     }
   }, [registrationNumber]);
 
-  // Generate QR code URL with secure token
+  // Generate QR code URL with secure token - points to the page, not API
   const getQRCodeValue = () => {
     if (!details?.qr_token) {
       return `${window.location.origin}/confirmation?reg=${registrationNumber}`;
     }
-    return `${window.location.origin}/api/qr/${details.qr_token}`;
+    return `${window.location.origin}/qr/${details.qr_token}`;
   };
 
   if (!registrationNumber) {

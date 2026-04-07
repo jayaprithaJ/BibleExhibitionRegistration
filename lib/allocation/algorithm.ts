@@ -213,6 +213,9 @@ async function allocateConsecutiveSlots(
   let tamilRemaining = tamilCount;
   let englishRemaining = englishCount;
   let groupSequence = 1;
+  
+  // Track used time slots to avoid assigning both languages to the same time
+  const usedTimes = new Set<string>();
 
   // Allocate Tamil slots
   if (tamilCount > 0) {
@@ -227,17 +230,22 @@ async function allocateConsecutiveSlots(
       if (toAllocate > 0) {
         await assignToSlot(slot.id, registrationId, toAllocate, 'tamil', groupSequence);
         tamilAssignments.push(toSlotInfo(slot, toAllocate));
+        usedTimes.add(slot.slot_time);
         tamilRemaining -= toAllocate;
         groupSequence++;
       }
     }
   }
 
-  // Allocate English slots
+  // Allocate English slots - try to avoid times already used by Tamil
   if (englishCount > 0) {
     const englishSlots = await findAvailableSlots(date, 'english', 1);
     
-    for (const slot of englishSlots) {
+    // First, try to allocate to slots with different times
+    const unusedTimeSlots = englishSlots.filter(slot => !usedTimes.has(slot.slot_time));
+    const slotsToUse = unusedTimeSlots.length > 0 ? unusedTimeSlots : englishSlots;
+    
+    for (const slot of slotsToUse) {
       if (englishRemaining <= 0) break;
       
       const availableInSlot = slot.capacity - slot.filled;
