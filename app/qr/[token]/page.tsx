@@ -89,7 +89,7 @@ export default function QRViewPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          registration_number: registration?.registration_number,
+          token: token,
           admin_password: adminPassword,
         }),
       });

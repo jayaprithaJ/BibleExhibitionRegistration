@@ -3,25 +3,41 @@ import { query } from '@/lib/db/client';
 
 export async function POST(request: Request) {
   try {
-    const { token, adminKey } = await request.json();
+    const { token, adminKey, registration_number, admin_password } = await request.json();
 
-    if (!token) {
+    // Support both token-based and registration_number-based check-in
+    const qrToken = token;
+    const regNumber = registration_number;
+    const password = adminKey || admin_password;
+
+    if (!qrToken && !regNumber) {
       return NextResponse.json(
-        { success: false, error: 'QR token is required' },
+        { success: false, error: 'QR token or registration number is required' },
         { status: 400 }
       );
     }
 
-    // Verify admin key for check-in authorization
-    const expectedAdminKey = process.env.ADMIN_PASSWORD;
-    if (!adminKey || adminKey !== expectedAdminKey) {
+    // Verify admin password for check-in authorization
+    const expectedAdminPassword = process.env.ADMIN_PASSWORD;
+    if (!password || password !== expectedAdminPassword) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized: Invalid admin key' },
+        { success: false, error: 'Unauthorized: Invalid admin password' },
         { status: 401 }
       );
     }
 
-    // Find registration by QR token
+    // Find registration by QR token or registration number
+    let whereClause = '';
+    let params: string[] = [];
+    
+    if (qrToken) {
+      whereClause = 'WHERE r.qr_token = $1';
+      params = [qrToken];
+    } else {
+      whereClause = 'WHERE r.registration_number = $1';
+      params = [regNumber];
+    }
+
     const registrationResult = await query<{
       id: string;
       registration_number: string;
@@ -40,8 +56,8 @@ export async function POST(request: Request) {
         r.checked_in,
         r.checked_in_at
       FROM registrations r
-      WHERE r.qr_token = $1`,
-      [token]
+      ${whereClause}`,
+      params
     );
 
     if (registrationResult.length === 0) {
