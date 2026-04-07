@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Users, Calendar, TrendingUp, Clock, RefreshCw, Trash2, List } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Users, Calendar, TrendingUp, Clock, RefreshCw, Trash2, List, Filter, CheckCircle, XCircle, Layers } from 'lucide-react';
 
 interface DateBreakdown {
   slot_date: string;
@@ -26,7 +26,23 @@ interface Registration {
   phone: string;
   email: string;
   created_at: string;
+  checked_in: boolean;
+  checked_in_at: string | null;
   slot_info: string;
+  slot_times: string;
+}
+
+interface Batch {
+  registration_id: string;
+  registration_number: string;
+  church_name: string;
+  slot_date: string;
+  slot_time: string;
+  language: string;
+  people_count: number;
+  group_sequence: number;
+  checked_in: boolean;
+  checked_in_at: string | null;
 }
 
 export default function AdminPage() {
@@ -41,9 +57,19 @@ export default function AdminPage() {
   });
   const [dateBreakdown, setDateBreakdown] = useState<DateBreakdown[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRegistrations, setShowRegistrations] = useState(false);
+  const [showBatches, setShowBatches] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'registrations' | 'batches'>('batches');
+  
+  // Filter states
+  const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'pending'>('all');
+  const [filterDate, setFilterDate] = useState<string>('all');
+  const [filterTime, setFilterTime] = useState<string>('all');
+  const [filterLanguage, setFilterLanguage] = useState<'all' | 'tamil' | 'english'>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const fetchStats = async () => {
     setLoading(true);
@@ -70,6 +96,18 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error('Error fetching registrations:', error);
+    }
+  };
+
+  const fetchBatches = async () => {
+    try {
+      const response = await fetch('/api/admin/batches');
+      const data = await response.json();
+      if (data.success) {
+        setBatches(data.batches);
+      }
+    } catch (error) {
+      console.error('Error fetching batches:', error);
     }
   };
 
@@ -102,6 +140,7 @@ export default function AdminPage() {
   useEffect(() => {
     fetchStats();
     fetchRegistrations();
+    fetchBatches();
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -111,6 +150,108 @@ export default function AdminPage() {
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  // Get unique dates and times for filters
+  const uniqueDates = useMemo(() => {
+    const dates = new Set(registrations.map(r => r.preferred_date));
+    return Array.from(dates).sort();
+  }, [registrations]);
+
+  const uniqueTimes = useMemo(() => {
+    const times = new Set<string>();
+    if (viewMode === 'batches') {
+      batches.forEach(b => times.add(b.slot_time));
+    } else {
+      registrations.forEach(r => {
+        if (r.slot_times) {
+          r.slot_times.split(', ').forEach(time => times.add(time));
+        }
+      });
+    }
+    return Array.from(times).sort();
+  }, [registrations, batches, viewMode]);
+
+  // Filter registrations
+  const filteredRegistrations = useMemo(() => {
+    return registrations.filter(reg => {
+      // Status filter
+      if (filterStatus === 'completed' && !reg.checked_in) return false;
+      if (filterStatus === 'pending' && reg.checked_in) return false;
+
+      // Date filter
+      if (filterDate !== 'all' && reg.preferred_date !== filterDate) return false;
+
+      // Time filter
+      if (filterTime !== 'all' && !reg.slot_times?.includes(filterTime)) return false;
+
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          reg.registration_number.toLowerCase().includes(query) ||
+          reg.name.toLowerCase().includes(query) ||
+          reg.church_name.toLowerCase().includes(query)
+        );
+      }
+
+      return true;
+    });
+  }, [registrations, filterStatus, filterDate, filterTime, searchQuery]);
+
+  // Stats for filtered results
+  const filteredStats = useMemo(() => {
+    const completed = filteredRegistrations.filter(r => r.checked_in).length;
+    const pending = filteredRegistrations.filter(r => !r.checked_in).length;
+    const totalPeople = filteredRegistrations.reduce((sum, r) => sum + r.total_people, 0);
+    
+    return { completed, pending, total: filteredRegistrations.length, totalPeople };
+  }, [filteredRegistrations]);
+
+  // Filter batches
+  const filteredBatches = useMemo(() => {
+    return batches.filter(batch => {
+      // Status filter
+      if (filterStatus === 'completed' && !batch.checked_in) return false;
+      if (filterStatus === 'pending' && batch.checked_in) return false;
+
+      // Date filter
+      if (filterDate !== 'all' && batch.slot_date !== filterDate) return false;
+
+      // Time filter
+      if (filterTime !== 'all' && batch.slot_time !== filterTime) return false;
+
+      // Language filter
+      if (filterLanguage !== 'all' && batch.language !== filterLanguage) return false;
+
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          batch.registration_number.toLowerCase().includes(query) ||
+          batch.church_name.toLowerCase().includes(query)
+        );
+      }
+
+      return true;
+    });
+  }, [batches, filterStatus, filterDate, filterTime, filterLanguage, searchQuery]);
+
+  // Stats for filtered batches
+  const filteredBatchStats = useMemo(() => {
+    const completed = filteredBatches.filter(b => b.checked_in).length;
+    const pending = filteredBatches.filter(b => !b.checked_in).length;
+    const totalPeople = filteredBatches.reduce((sum, b) => sum + b.people_count, 0);
+    
+    return { completed, pending, total: filteredBatches.length, totalPeople };
+  }, [filteredBatches]);
+
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+    return `${displayHour}:${minutes} ${ampm}`;
   };
 
   return (
@@ -236,6 +377,9 @@ export default function AdminPage() {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
               All Registrations
+              <span className="text-sm font-normal text-gray-500 ml-2">
+                ({filteredStats.total} of {registrations.length})
+              </span>
             </h2>
             <div className="flex gap-2">
               <button
@@ -259,11 +403,133 @@ export default function AdminPage() {
             </div>
           </div>
 
+          {/* Filter Stats */}
+          {showRegistrations && (
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span className="font-semibold text-green-900">Completed</span>
+                </div>
+                <p className="text-2xl font-bold text-green-600">{filteredStats.completed}</p>
+              </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock className="w-5 h-5 text-yellow-600" />
+                  <span className="font-semibold text-yellow-900">Pending</span>
+                </div>
+                <p className="text-2xl font-bold text-yellow-600">{filteredStats.pending}</p>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  <span className="font-semibold text-blue-900">Total People</span>
+                </div>
+                <p className="text-2xl font-bold text-blue-600">{filteredStats.totalPeople}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Filters */}
+          {showRegistrations && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center gap-2 mb-4">
+                <Filter className="w-5 h-5 text-gray-600" />
+                <h3 className="font-semibold text-gray-900">Filters</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Search */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Search
+                  </label>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Name, Reg#, Church..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Check-in Status
+                  </label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                </div>
+
+                {/* Date Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date
+                  </label>
+                  <select
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">All Dates</option>
+                    {uniqueDates.map(date => (
+                      <option key={date} value={date}>
+                        {formatDate(date)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Time Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Time Slot
+                  </label>
+                  <select
+                    value={filterTime}
+                    onChange={(e) => setFilterTime(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">All Times</option>
+                    {uniqueTimes.map(time => (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Clear Filters */}
+              {(filterStatus !== 'all' || filterDate !== 'all' || filterTime !== 'all' || searchQuery) && (
+                <button
+                  onClick={() => {
+                    setFilterStatus('all');
+                    setFilterDate('all');
+                    setFilterTime('all');
+                    setSearchQuery('');
+                  }}
+                  className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
+          )}
+
           {showRegistrations && (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b-2 border-gray-200">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Reg #</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Name</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Church</th>
@@ -274,8 +540,21 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {registrations.map((reg) => (
+                  {filteredRegistrations.map((reg) => (
                     <tr key={reg.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4">
+                        {reg.checked_in ? (
+                          <div className="flex items-center gap-1 text-green-600">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="text-xs font-medium">Done</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 text-yellow-600">
+                            <Clock className="w-4 h-4" />
+                            <span className="text-xs font-medium">Pending</span>
+                          </div>
+                        )}
+                      </td>
                       <td className="py-3 px-4 font-mono text-sm">{reg.registration_number}</td>
                       <td className="py-3 px-4">{reg.name}</td>
                       <td className="py-3 px-4">{reg.church_name}</td>
@@ -303,10 +582,10 @@ export default function AdminPage() {
                       </td>
                     </tr>
                   ))}
-                  {registrations.length === 0 && (
+                  {filteredRegistrations.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-gray-500">
-                        No registrations found
+                      <td colSpan={8} className="py-8 text-center text-gray-500">
+                        {registrations.length === 0 ? 'No registrations found' : 'No registrations match the selected filters'}
                       </td>
                     </tr>
                   )}
