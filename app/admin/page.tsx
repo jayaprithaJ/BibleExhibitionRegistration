@@ -60,7 +60,7 @@ export default function AdminPage() {
   const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRegistrations, setShowRegistrations] = useState(false);
-  const [showBatches, setShowBatches] = useState(false);
+  const [showBatches, setShowBatches] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'registrations' | 'batches'>('batches');
   
