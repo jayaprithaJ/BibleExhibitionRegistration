@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Calendar, Users, Clock, Edit2, Trash2, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -23,7 +23,7 @@ interface Registration {
   qr_token: string;
 }
 
-export default function LookupPage() {
+function LookupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [phone, setPhone] = useState('');
@@ -332,6 +332,20 @@ export default function LookupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LookupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <LookupContent />
+    </Suspense>
   );
 }
 
