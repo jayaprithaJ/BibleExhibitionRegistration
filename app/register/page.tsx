@@ -125,16 +125,31 @@ export default function RegisterPage() {
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="2026-06-06">Saturday, June 6 (1:30 PM - 8:00 PM)</option>
-                <option value="2026-06-07">Sunday, June 7 (9:30 AM - 8:00 PM)</option>
-                <option value="2026-06-13">Saturday, June 13 (1:30 PM - 8:00 PM)</option>
-                <option value="2026-06-14">Sunday, June 14 (9:30 AM - 8:00 PM)</option>
-                <option value="2026-06-20">Saturday, June 20 (1:30 PM - 8:00 PM)</option>
-                <option value="2026-06-21">Sunday, June 21 (9:30 AM - 8:00 PM)</option>
+                <optgroup label="Weekends (Recommended)">
+                  <option value="2026-06-06">Saturday, June 6 (1:30 PM - 8:00 PM)</option>
+                  <option value="2026-06-07">Sunday, June 7 (9:30 AM - 8:00 PM)</option>
+                  <option value="2026-06-13">Saturday, June 13 (1:30 PM - 8:00 PM)</option>
+                  <option value="2026-06-14">Sunday, June 14 (9:30 AM - 8:00 PM)</option>
+                  <option value="2026-06-20">Saturday, June 20 (1:30 PM - 8:00 PM)</option>
+                  <option value="2026-06-21">Sunday, June 21 (9:30 AM - 8:00 PM)</option>
+                </optgroup>
+                <optgroup label="Weekdays (5:00 PM - 8:00 PM) - Open to Public">
+                  <option value="2026-06-09">Monday, June 9 (5:00 PM - 8:00 PM) ⚠️ Public Hours</option>
+                  <option value="2026-06-10">Tuesday, June 10 (5:00 PM - 8:00 PM) ⚠️ Public Hours</option>
+                  <option value="2026-06-11">Wednesday, June 11 (5:00 PM - 8:00 PM) ⚠️ Public Hours</option>
+                  <option value="2026-06-16">Monday, June 16 (5:00 PM - 8:00 PM) ⚠️ Public Hours</option>
+                  <option value="2026-06-17">Tuesday, June 17 (5:00 PM - 8:00 PM) ⚠️ Public Hours</option>
+                  <option value="2026-06-18">Wednesday, June 18 (5:00 PM - 8:00 PM) ⚠️ Public Hours</option>
+                </optgroup>
               </select>
-              <p className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
-                <strong>Note:</strong> Friday slots available by phone only. Call church office to register for Fridays.
-              </p>
+              <div className="mt-2 space-y-2">
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+                  <strong>⚠️ Weekday Note:</strong> Evening sessions (5-8 PM) are open to the public. Expect possible delays due to walk-in visitors. For exclusive group time, call to book other hours.
+                </p>
+                <p className="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded p-2">
+                  <strong>📞 Friday & Custom Times:</strong> Call church office for Friday slots or to arrange exclusive group bookings at other times.
+                </p>
+              </div>
             </div>
 
             {/* Total People */}

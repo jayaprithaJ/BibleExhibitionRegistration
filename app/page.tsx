@@ -191,6 +191,38 @@ export default function Home() {
                 <p className="text-xs text-slate-500 mt-2">No break</p>
               </div>
             </div>
+
+            {/* Weekday Notice */}
+            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Weekdays (Mon-Thu)
+              </h3>
+              
+              <div className="bg-white rounded-lg p-4 mb-3">
+                <p className="text-purple-900 font-bold text-lg mb-2">
+                  ✅ Online Registration Available
+                </p>
+                <p className="text-xl font-bold text-purple-800 mb-2">
+                  5:00 PM - 8:00 PM
+                </p>
+                <p className="text-sm text-purple-700">
+                  Book your slot directly through this portal
+                </p>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-300 rounded-lg p-4">
+                <p className="text-amber-900 font-semibold mb-2">
+                  ⏰ Please Note: Open to Public
+                </p>
+                <p className="text-sm text-amber-800 mb-2">
+                  Weekday evening sessions (5-8 PM) are open to the general public. Your group may experience slight delays as we accommodate walk-in visitors.
+                </p>
+                <p className="text-sm text-amber-900 font-medium">
+                  💡 For exclusive group time or other hours, please call the church office to arrange a private booking.
+                </p>
+              </div>
+            </div>
             
             {/* Friday Special Notice */}
             <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-6 mb-6">

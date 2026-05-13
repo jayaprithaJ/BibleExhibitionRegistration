@@ -31,9 +31,8 @@ export const registrationSchema = z
     englishCount: z.number().int().min(0, 'English count cannot be negative'),
     phone: z
       .string()
-      .min(10, 'Phone number must be at least 10 digits')
-      .max(20, 'Phone number is too long')
-      .regex(/^[+]?[\d\s()-]+$/, 'Invalid phone number format'),
+      .min(10, 'Phone number must be at least 10 characters')
+      .max(50, 'Phone number is too long'),
     email: z.string().email('Invalid email address').optional().or(z.literal('')),
   })
   .refine((data) => data.tamilCount + data.englishCount === data.totalPeople, {
