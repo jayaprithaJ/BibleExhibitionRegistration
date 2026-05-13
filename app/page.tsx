@@ -1,7 +1,23 @@
+'use client';
+
 import Link from 'next/link';
-import { BookOpen, Calendar, Users, Heart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { BookOpen, Calendar, Users, Heart, Search } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Home() {
+  const router = useRouter();
+  const [phone, setPhone] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLookup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (phone.trim()) {
+      setLoading(true);
+      router.push(`/lookup?phone=${encodeURIComponent(phone)}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
       {/* Hero Section with Church Background */}
@@ -70,6 +86,53 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Manage Registration Section */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <div className="bg-white border-2 border-slate-200 rounded-lg p-8 shadow-lg">
+            <div className="text-center mb-6">
+              <Search className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+              <h2 className="text-2xl font-serif font-bold text-slate-800 mb-2">
+                Already Registered?
+              </h2>
+              <p className="text-slate-600">
+                Enter your phone number to view or manage your registration
+              </p>
+            </div>
+            
+            <form onSubmit={handleLookup} className="max-w-md mx-auto">
+              <div className="flex gap-3">
+                <input
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Enter your phone number"
+                  className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-lg"
+                  minLength={10}
+                  maxLength={20}
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-3 bg-slate-700 text-white rounded-lg font-semibold hover:bg-slate-800 disabled:bg-slate-400 transition-colors flex items-center gap-2"
+                >
+                  <Search className="w-5 h-5" />
+                  {loading ? 'Searching...' : 'Find'}
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 mt-2 text-center">
+                Use the same phone number you used during registration
+              </p>
+            </form>
+
+            <div className="mt-6 pt-6 border-t border-slate-200">
+              <p className="text-sm text-slate-600 text-center">
+                <strong>What you can do:</strong> View registration details • Access QR code • Cancel registration
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Features - Simple and Humble */}
         <div className="grid md:grid-cols-3 gap-8 mb-16 max-w-5xl mx-auto">
           <div className="text-center">
@@ -109,28 +172,49 @@ export default function Home() {
             <h2 className="text-2xl font-serif font-semibold text-slate-800 mb-6 text-center">
               Exhibition Hours
             </h2>
-            <div className="grid md:grid-cols-3 gap-8 text-center">
-              <div className="border-l-4 border-slate-300 pl-4">
+            <div className="grid md:grid-cols-2 gap-8 mb-6">
+              <div className="border-l-4 border-blue-500 pl-4">
                 <h3 className="text-lg font-semibold text-slate-700 mb-2">
-                  Saturdays & Sundays
+                  Saturdays
                 </h3>
-                <p className="text-slate-600 text-sm mb-2">Full Day Sessions</p>
-                <p className="text-2xl font-bold text-slate-800">9 AM - 8 PM</p>
+                <p className="text-slate-600 text-sm mb-2">Two Sessions</p>
+                <p className="text-xl font-bold text-slate-800">1:30 PM - 5:00 PM</p>
+                <p className="text-xl font-bold text-slate-800">6:00 PM - 8:00 PM</p>
+                <p className="text-xs text-slate-500 mt-2">Break: 5:00 PM - 6:00 PM</p>
               </div>
-              <div className="border-l-4 border-slate-300 pl-4">
+              <div className="border-l-4 border-green-500 pl-4">
                 <h3 className="text-lg font-semibold text-slate-700 mb-2">
-                  Fridays
+                  Sundays
                 </h3>
-                <p className="text-slate-600 text-sm mb-2">Evening Sessions</p>
-                <p className="text-2xl font-bold text-slate-800">6 PM - 9 PM</p>
+                <p className="text-slate-600 text-sm mb-2">Continuous Session</p>
+                <p className="text-xl font-bold text-slate-800">9:30 AM - 8:00 PM</p>
+                <p className="text-xs text-slate-500 mt-2">No break</p>
               </div>
-              <div className="border-l-4 border-slate-300 pl-4">
-                <h3 className="text-lg font-semibold text-slate-700 mb-2">
-                  Languages
-                </h3>
-                <p className="text-slate-600 text-sm mb-2">Audio Guides</p>
-                <p className="text-2xl font-bold text-slate-800">Tamil & English</p>
-              </div>
+            </div>
+            
+            {/* Friday Special Notice */}
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-amber-900 mb-2 flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Friday Sessions - Call to Register
+              </h3>
+              <p className="text-amber-800 mb-3">
+                Friday slots are available <strong>before and after vesper service</strong> by phone registration only.
+              </p>
+              <p className="text-amber-900 font-semibold">
+                📞 Please call the church office to book Friday slots
+              </p>
+              <p className="text-xs text-amber-700 mt-2">
+                Friday dates are not available for online registration
+              </p>
+            </div>
+
+            {/* Languages */}
+            <div className="text-center pt-4 border-t border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-700 mb-2">
+                Audio Guides Available
+              </h3>
+              <p className="text-2xl font-bold text-slate-800">Tamil & English</p>
             </div>
           </div>
         </div>

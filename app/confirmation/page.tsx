@@ -199,15 +199,24 @@ function ConfirmationContent() {
           )}
 
           <div className="text-left space-y-4 mb-8">
-            <div className="border-l-4 border-blue-500 pl-4">
-              <h3 className="font-semibold text-gray-900 mb-2">
-                Important Instructions:
+            <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6">
+              <h3 className="font-semibold text-green-900 mb-3 text-lg flex items-center gap-2">
+                <QrCode className="w-6 h-6" />
+                At the Exhibition Venue
               </h3>
-              <ul className="list-disc list-inside text-gray-600 space-y-1">
-                <li>Please arrive 10 minutes before your scheduled time</li>
-                <li>Save this confirmation on your mobile device or take a screenshot</li>
-                <li>Show your registration number or QR code at entry</li>
-                <li>Audio guides will be provided in your selected language</li>
+              <div className="bg-white rounded-lg p-4 mb-3">
+                <p className="text-green-900 font-bold text-xl mb-2">
+                  📱 Show Your QR Code at Entry
+                </p>
+                <p className="text-green-800">
+                  Staff will scan your QR code for quick check-in. Have it ready on your phone or as a screenshot.
+                </p>
+              </div>
+              <ul className="list-disc list-inside text-green-800 space-y-2">
+                <li><strong>Save this page</strong> or take a screenshot of the QR code</li>
+                <li><strong>Arrive 10 minutes early</strong> before your scheduled time</li>
+                <li><strong>Show QR code</strong> to staff at the entrance for scanning</li>
+                <li><strong>Audio guides</strong> will be provided in your selected language</li>
               </ul>
             </div>
 
@@ -229,6 +238,12 @@ function ConfirmationContent() {
               className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
               Back to Home
+            </Link>
+            <Link
+              href="/lookup"
+              className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
+            >
+              View My Registrations
             </Link>
             <button
               onClick={() => {

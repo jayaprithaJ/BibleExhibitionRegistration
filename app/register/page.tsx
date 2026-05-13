@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 export default function RegisterPage() {
@@ -52,10 +53,29 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4 max-w-2xl">
+        {/* Info Banner */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-sm text-blue-800">
+            💡 <strong>Already registered?</strong> Visit the{' '}
+            <Link href="/lookup" className="underline font-semibold hover:text-blue-900">
+              Lookup Page
+            </Link>{' '}
+            to view or manage your registrations using your phone number.
+          </p>
+        </div>
+
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">
-            Register for Bible Exhibition
-          </h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Register for Bible Exhibition
+            </h1>
+            <Link
+              href="/"
+              className="text-blue-600 hover:text-blue-700 text-sm"
+            >
+              ← Back
+            </Link>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name */}
@@ -105,16 +125,16 @@ export default function RegisterPage() {
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="2026-06-05">Friday, June 5 (6 PM - 9 PM)</option>
-                <option value="2026-06-06">Saturday, June 6 (9 AM - 8 PM)</option>
-                <option value="2026-06-07">Sunday, June 7 (9 AM - 8 PM)</option>
-                <option value="2026-06-12">Friday, June 12 (6 PM - 9 PM)</option>
-                <option value="2026-06-13">Saturday, June 13 (9 AM - 8 PM)</option>
-                <option value="2026-06-14">Sunday, June 14 (9 AM - 8 PM)</option>
-                <option value="2026-06-19">Friday, June 19 (6 PM - 9 PM)</option>
-                <option value="2026-06-20">Saturday, June 20 (9 AM - 8 PM)</option>
-                <option value="2026-06-21">Sunday, June 21 (9 AM - 8 PM)</option>
+                <option value="2026-06-06">Saturday, June 6 (1:30 PM - 8:00 PM)</option>
+                <option value="2026-06-07">Sunday, June 7 (9:30 AM - 8:00 PM)</option>
+                <option value="2026-06-13">Saturday, June 13 (1:30 PM - 8:00 PM)</option>
+                <option value="2026-06-14">Sunday, June 14 (9:30 AM - 8:00 PM)</option>
+                <option value="2026-06-20">Saturday, June 20 (1:30 PM - 8:00 PM)</option>
+                <option value="2026-06-21">Sunday, June 21 (9:30 AM - 8:00 PM)</option>
               </select>
+              <p className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+                <strong>Note:</strong> Friday slots available by phone only. Call church office to register for Fridays.
+              </p>
             </div>
 
             {/* Total People */}
@@ -179,20 +199,26 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Phone (Optional) */}
+            {/* Phone (Required) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phone (Optional)
+                Phone Number *
               </label>
               <input
                 type="tel"
+                required
                 value={formData.phone}
                 onChange={(e) =>
                   setFormData({ ...formData, phone: e.target.value })
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="+91 9876543210"
+                minLength={10}
+                maxLength={20}
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Required for registration lookup and modifications
+              </p>
             </div>
 
             {/* Email (Optional) */}
