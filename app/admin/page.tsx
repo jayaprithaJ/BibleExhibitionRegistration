@@ -742,9 +742,9 @@ export default function AdminPage() {
           </h2>
           <div className="space-y-4">
             <div className="border-l-4 border-blue-500 pl-4">
-              <h3 className="font-semibold text-gray-900">Weekends</h3>
+              <h3 className="font-semibold text-gray-900">Saturdays & Sundays</h3>
               <p className="text-gray-600">
-                Saturdays & Sundays: 9 AM - 8 PM (660 capacity/day)
+                Full Day Sessions: 9 AM - 8 PM (660 capacity/day)
               </p>
             </div>
             <div className="border-l-4 border-green-500 pl-4">

@@ -114,7 +114,7 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-slate-700 mb-2">
                   Saturdays & Sundays
                 </h3>
-                <p className="text-slate-600 text-sm mb-2">Weekends</p>
+                <p className="text-slate-600 text-sm mb-2">Full Day Sessions</p>
                 <p className="text-2xl font-bold text-slate-800">9 AM - 8 PM</p>
               </div>
               <div className="border-l-4 border-slate-300 pl-4">

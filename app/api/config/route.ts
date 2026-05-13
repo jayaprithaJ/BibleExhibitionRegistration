@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // GET all configurations
 export async function GET() {
   try {
@@ -66,6 +69,76 @@ export async function PUT(request: Request) {
     await query(
       `UPDATE site_config 
        SET config_value = $1, 
+           updated_at = NOW(),
+           updated_by = $2
+       WHERE config_key = $3 AND is_editable = true`,
+      [config_value, updated_by || 'admin', config_key]
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: 'Configuration updated successfully',
+    });
+  } catch (error) {
+    console.error('Error updating config:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to update configuration' },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH update configuration (alternative to PUT)
+export async function PATCH(request: Request) {
+  try {
+    const { config_key, config_value, updated_by } = await request.json();
+
+    if (!config_key || config_value === undefined) {
+      return NextResponse.json(
+        { success: false, error: 'config_key and config_value are required' },
+        { status: 400 }
+      );
+    }
+
+    // Update the configuration
+    await query(
+      `UPDATE site_config
+       SET config_value = $1,
+           updated_at = NOW(),
+           updated_by = $2
+       WHERE config_key = $3 AND is_editable = true`,
+      [config_value, updated_by || 'admin', config_key]
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: 'Configuration updated successfully',
+    });
+  } catch (error) {
+    console.error('Error updating config:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to update configuration' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST update configuration (alternative method)
+export async function POST(request: Request) {
+  try {
+    const { config_key, config_value, updated_by } = await request.json();
+
+    if (!config_key || config_value === undefined) {
+      return NextResponse.json(
+        { success: false, error: 'config_key and config_value are required' },
+        { status: 400 }
+      );
+    }
+
+    // Update the configuration
+    await query(
+      `UPDATE site_config
+       SET config_value = $1,
            updated_at = NOW(),
            updated_by = $2
        WHERE config_key = $3 AND is_editable = true`,

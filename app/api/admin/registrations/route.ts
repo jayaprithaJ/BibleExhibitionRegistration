@@ -35,11 +35,11 @@ export async function GET() {
         r.checked_in,
         r.checked_in_at,
         STRING_AGG(
-          'Slot ' || sa.group_sequence || ': ' || s.slot_time || ' (' || sa.language || ': ' || sa.people_count || ')',
+          'Slot ' || sa.group_sequence || ': ' || s.slot_time::TEXT || ' (' || sa.language || ': ' || sa.people_count || ')',
           ', '
           ORDER BY sa.group_sequence
         ) as slot_info,
-        STRING_AGG(DISTINCT s.slot_time, ', ' ORDER BY s.slot_time) as slot_times
+        STRING_AGG(DISTINCT s.slot_time::TEXT, ', ' ORDER BY s.slot_time::TEXT) as slot_times
       FROM registrations r
       LEFT JOIN slot_assignments sa ON r.id = sa.registration_id
       LEFT JOIN slots s ON sa.slot_id = s.id
