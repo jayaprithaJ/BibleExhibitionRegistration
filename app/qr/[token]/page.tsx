@@ -2,7 +2,8 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, Users, CheckCircle, XCircle, Shield } from 'lucide-react';
+import { Calendar, Clock, Users, CheckCircle, XCircle, Shield, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface SlotInfo {
   language: string;
@@ -137,6 +138,25 @@ export default function QRViewPage() {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="container mx-auto max-w-2xl">
         <div className="bg-white rounded-lg shadow-md p-6 mb-4">
+          {/* QR Code Display */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6 text-center">
+            <h2 className="text-lg font-semibold text-blue-900 mb-3 flex items-center justify-center gap-2">
+              <QrCode className="w-6 h-6" />
+              Your QR Code
+            </h2>
+            <div className="bg-white p-4 rounded-lg inline-block mb-3">
+              <QRCodeSVG
+                value={`${window.location.origin}/qr/${token}`}
+                size={200}
+                level="H"
+                includeMargin={true}
+              />
+            </div>
+            <p className="text-sm text-blue-800">
+              Show this QR code at the exhibition entrance for check-in
+            </p>
+          </div>
+
           {/* Check-in Status */}
           {registration.checked_in ? (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">

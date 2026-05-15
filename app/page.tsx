@@ -87,46 +87,46 @@ export default function Home() {
         </div>
 
         {/* Manage Registration Section */}
-        <div className="max-w-4xl mx-auto mb-16">
-          <div className="bg-white border-2 border-slate-200 rounded-lg p-8 shadow-lg">
-            <div className="text-center mb-6">
-              <Search className="w-12 h-12 text-slate-700 mx-auto mb-4" />
-              <h2 className="text-2xl font-serif font-bold text-slate-800 mb-2">
+        <div className="max-w-4xl mx-auto mb-12 md:mb-16">
+          <div className="bg-white border-2 border-slate-200 rounded-lg p-4 sm:p-6 md:p-8 shadow-lg">
+            <div className="text-center mb-4 sm:mb-6">
+              <Search className="w-10 h-10 sm:w-12 sm:h-12 text-slate-700 mx-auto mb-3 sm:mb-4" />
+              <h2 className="text-xl sm:text-2xl font-serif font-bold text-slate-800 mb-2">
                 Already Registered?
               </h2>
-              <p className="text-slate-600">
+              <p className="text-sm sm:text-base text-slate-600 px-2">
                 Enter your phone number to view or manage your registration
               </p>
             </div>
             
             <form onSubmit={handleLookup} className="max-w-md mx-auto">
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="tel"
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Enter your phone number"
-                  className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-lg"
+                  className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base sm:text-lg"
                   minLength={10}
                   maxLength={20}
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-3 bg-slate-700 text-white rounded-lg font-semibold hover:bg-slate-800 disabled:bg-slate-400 transition-colors flex items-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3 bg-slate-700 text-white rounded-lg font-semibold hover:bg-slate-800 disabled:bg-slate-400 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                 >
                   <Search className="w-5 h-5" />
                   {loading ? 'Searching...' : 'Find'}
                 </button>
               </div>
-              <p className="text-xs text-slate-500 mt-2 text-center">
+              <p className="text-xs text-slate-500 mt-2 text-center px-2">
                 Use the same phone number you used during registration
               </p>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-slate-200">
-              <p className="text-sm text-slate-600 text-center">
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-200">
+              <p className="text-xs sm:text-sm text-slate-600 text-center px-2">
                 <strong>What you can do:</strong> View registration details • Access QR code • Cancel registration
               </p>
             </div>
