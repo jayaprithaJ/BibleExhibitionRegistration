@@ -88,23 +88,23 @@ export default function Home() {
           </div>
           
           {/* Event Details - Three Boxes in a Row */}
-          <div className="flex flex-wrap justify-center items-center gap-4 mb-8 max-w-5xl mx-auto">
+          <div className="flex flex-wrap justify-center items-stretch gap-4 mb-8 max-w-5xl mx-auto">
             {/* Inauguration Notice - Left */}
-            <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4 rounded-lg shadow-xl border-2 border-purple-400 flex-shrink-0">
+            <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-5 rounded-lg shadow-xl border-2 border-purple-400 flex-shrink-0 flex flex-col justify-center min-h-[120px]">
               <p className="text-white font-bold text-lg mb-1">🎉 Grand Inauguration</p>
-              <p className="text-purple-100">June 5, 2026 • 6:30 PM</p>
+              <p className="text-purple-100 text-base">June 5, 2026 • 6:30 PM</p>
             </div>
             
             {/* Exhibition Dates - Center with gradient */}
-            <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-8 py-4 rounded-lg shadow-xl border-2 border-slate-500 flex-shrink-0">
+            <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-8 py-5 rounded-lg shadow-xl border-2 border-slate-500 flex-shrink-0 flex flex-col justify-center min-h-[120px]">
               <p className="text-white font-bold text-xl mb-1">📅 Exhibition</p>
-              <p className="text-slate-200 text-lg">From June 5th to June 21st, 2026</p>
+              <p className="text-slate-200 text-base">From June 5th to June 21st, 2026</p>
             </div>
             
             {/* Vespers Program Notice - Right */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 rounded-lg shadow-xl border-2 border-blue-400 flex-shrink-0">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 rounded-lg shadow-xl border-2 border-blue-400 flex-shrink-0 flex flex-col justify-center min-h-[120px]">
               <p className="text-white font-bold text-lg mb-1">✨ Special Children's Program</p>
-              <p className="text-blue-100">"Holy Spirit Unleashed"</p>
+              <p className="text-blue-100 text-base">"Holy Spirit Unleashed"</p>
               <p className="text-blue-200 text-sm mt-1">During Vespers</p>
             </div>
           </div>
