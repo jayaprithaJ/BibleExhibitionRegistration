@@ -68,7 +68,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
       {/* Hero Section with Church Background */}
-      <div className="relative bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/church-bg.jpg')" }}>
+      <div className="relative bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/church-building.jpg')" }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80"></div>
         <div className="relative container mx-auto px-4 py-16 text-center">
           <div className="mb-6">
