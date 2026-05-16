@@ -72,20 +72,37 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80"></div>
         <div className="relative container mx-auto px-4 py-16 text-center">
           <div className="mb-6">
-            <BookOpen className="w-16 h-16 text-white mx-auto mb-4 drop-shadow-lg" />
+            <BookOpen className="w-16 h-16 text-cyan-400 mx-auto mb-4 drop-shadow-lg" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4 drop-shadow-lg">
-            Bible Exhibition 2026
+          <h1 className="text-5xl md:text-6xl font-serif font-bold text-cyan-400 mb-3 drop-shadow-lg tracking-wide">
+            BIBLIO '26
           </h1>
+          <p className="text-2xl md:text-3xl text-yellow-400 font-semibold mb-6 drop-shadow-lg italic">
+            Experience the Bible like never before
+          </p>
           <div className="max-w-2xl mx-auto mb-6">
             <p className="text-lg italic text-white mb-2 drop-shadow-md">
               "Thy word is a lamp unto my feet, and a light unto my path."
             </p>
             <p className="text-sm text-gray-200 drop-shadow-md">— Psalm 119:105</p>
           </div>
+          
+          {/* Inauguration Notice */}
+          <div className="inline-block bg-gradient-to-r from-purple-600 to-purple-700 px-8 py-4 rounded-lg mb-4 shadow-xl border-2 border-purple-400">
+            <p className="text-white font-bold text-xl mb-1">🎉 Grand Inauguration</p>
+            <p className="text-purple-100 text-lg">June 5, 2026 • 6:30 PM</p>
+          </div>
+          
+          {/* Vespers Program Notice */}
+          <div className="inline-block bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 rounded-lg mb-6 shadow-xl border-2 border-blue-400">
+            <p className="text-white font-bold text-lg mb-1">✨ Special Children's Program</p>
+            <p className="text-blue-100 text-lg">"Holy Spirit Unleashed"</p>
+            <p className="text-blue-200 text-sm mt-1">During Vespers</p>
+          </div>
+          
           <div className="inline-block bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg mb-8">
             <p className="text-slate-800 font-medium">
-              June 5-21, 2026
+              Exhibition: June 5-21, 2026
             </p>
           </div>
           <div>
