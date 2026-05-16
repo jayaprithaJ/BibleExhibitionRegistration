@@ -5,8 +5,8 @@ import type { RegistrationInput } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if registration is open (after March 28, 2026)
-    const registrationOpenDate = new Date('2026-03-28T00:00:00+05:30'); // March 28, 2026 IST
+    // Check if registration is open (after May 28, 2026)
+    const registrationOpenDate = new Date('2026-05-28T00:00:00+05:30'); // May 28, 2026 IST
     const now = new Date();
     
     if (now < registrationOpenDate) {

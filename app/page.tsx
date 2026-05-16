@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Calendar, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { BookOpen, Calendar, Users, Heart, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const modelPhotos = [
   { id: 1, name: 'Garden of Eden', file: 'M1-GardenofEden.png' },
@@ -42,12 +42,12 @@ export default function Home() {
   const [registrationOpen, setRegistrationOpen] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Check if registration is open
-  useState(() => {
-    const registrationOpenDate = new Date('2026-03-28T00:00:00+05:30');
+  // Check if registration is open (after May 28, 2026)
+  useEffect(() => {
+    const registrationOpenDate = new Date('2026-05-28T00:00:00+05:30');
     const now = new Date();
     setRegistrationOpen(now >= registrationOpenDate);
-  });
+  }, []);
 
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,72 +66,146 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Section - Flyer Theme */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 via-slate-900 to-yellow-900/20"></div>
-        <div className="relative container mx-auto px-4 py-16 text-center">
-          {/* Bible Verse */}
-          <p className="text-yellow-400 text-lg md:text-xl italic mb-2 font-serif">
-            "Thy word is a lamp unto my feet, and a light unto my path."
-          </p>
-          <p className="text-cyan-300 text-sm mb-8">Psalm 119:105</p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+      {/* Hero Section with Glossy Effect */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(0, 188, 212, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.3) 0%, transparent 50%)',
+          }}></div>
+        </div>
+        
+        {/* Church Building Image with Glossy Overlay */}
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-20">
+          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-slate-900/50 to-slate-900"></div>
+          <img
+            src="/church-building.jpg"
+            alt="Church"
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        </div>
 
-          {/* Church Name */}
-          <h2 className="text-white text-xl md:text-2xl font-bold mb-2 tracking-wide">
-            SEVENTH-DAY ADVENTIST
-          </h2>
-          <h1 className="text-yellow-400 text-3xl md:text-5xl font-bold mb-8 tracking-wider">
-            LOWRY TAMIL CHURCH
-          </h1>
-
-          {/* Main Title */}
-          <p className="text-white text-lg md:text-xl mb-4">Cordially invites you to</p>
-          <h1 className="text-cyan-400 text-6xl md:text-8xl font-black mb-6 tracking-wider" style={{ fontFamily: 'Impact, sans-serif' }}>
-            BIBLIO '26
-          </h1>
-          <p className="text-white text-2xl md:text-3xl font-bold mb-12">
-            Experience the Bible<br />Like Never Before
-          </p>
-
-          {/* Registration Notice or Button */}
-          {!registrationOpen ? (
-            <div className="inline-block bg-yellow-500/20 border-2 border-yellow-400 rounded-lg px-8 py-4 mb-8">
-              <p className="text-yellow-400 font-bold text-xl">
-                📅 Registration Opens March 28, 2026
+        {/* Glossy Card Effect */}
+        <div className="relative container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto backdrop-blur-sm bg-white/5 rounded-3xl border border-white/10 p-8 md:p-12 shadow-2xl">
+            {/* Glass shine effect */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none"></div>
+            
+            <div className="relative text-center">
+              <div className="mb-6">
+                <BookOpen className="w-16 h-16 text-cyan-400 mx-auto mb-4 drop-shadow-lg" />
+              </div>
+              
+              {/* Bible Verse */}
+              <p className="text-yellow-300 text-lg md:text-xl italic mb-2 font-serif drop-shadow-lg">
+                "Thy word is a lamp unto my feet, and a light unto my path."
               </p>
-            </div>
-          ) : (
-            <Link
-              href="/register"
-              className="inline-block bg-cyan-500 hover:bg-cyan-600 text-slate-900 px-10 py-4 rounded-lg text-xl font-bold transition-colors shadow-lg shadow-cyan-500/50"
-            >
-              Register Your Group
-            </Link>
-          )}
+              <p className="text-cyan-300 text-sm mb-6 drop-shadow-md">Psalm 119:105</p>
 
-          {/* Key Info */}
-          <div className="mt-12 grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            <div className="bg-slate-800/50 border border-cyan-500/30 rounded-lg p-6">
-              <p className="text-cyan-400 font-bold text-lg mb-2">Exhibition Dates</p>
-              <p className="text-white text-2xl font-bold">June 5 - 21, 2026</p>
-            </div>
-            <div className="bg-slate-800/50 border border-yellow-500/30 rounded-lg p-6">
-              <p className="text-yellow-400 font-bold text-lg mb-2">Inaugural Vespers</p>
-              <p className="text-white text-2xl font-bold">June 5th, 2026</p>
+              {/* Church Name */}
+              <h2 className="text-white text-xl md:text-2xl font-bold mb-2 tracking-wide drop-shadow-lg">
+                SEVENTH-DAY ADVENTIST
+              </h2>
+              <h1 className="text-yellow-300 text-3xl md:text-4xl font-bold mb-6 tracking-wider drop-shadow-lg">
+                LOWRY TAMIL CHURCH
+              </h1>
+
+              <p className="text-white text-lg md:text-xl mb-4 drop-shadow-md">Cordially invites you to</p>
+              
+              {/* Main Title - BIBLIO '26 with Glossy Effect */}
+              <div className="relative inline-block mb-4">
+                <h1 className="text-cyan-400 text-6xl md:text-8xl font-black tracking-wider relative z-10"
+                    style={{
+                      fontFamily: 'Impact, sans-serif',
+                      textShadow: '0 0 40px rgba(0, 188, 212, 0.8), 0 0 80px rgba(0, 188, 212, 0.4)',
+                      WebkitTextStroke: '2px rgba(0, 188, 212, 0.3)'
+                    }}>
+                  BIBLIO '26
+                </h1>
+                {/* Glossy reflection */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent rounded-lg blur-xl"></div>
+              </div>
+              
+              <p className="text-white text-2xl md:text-3xl font-bold mb-8 drop-shadow-lg">
+                Experience the Bible Like Never Before
+              </p>
+
+              <div className="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-xl mb-6 shadow-lg">
+                <p className="text-white font-bold text-lg">
+                  June 5-21, 2026
+                </p>
+                <p className="text-cyan-200 text-sm">
+                  Inaugural Vespers: June 5th, 2026
+                </p>
+              </div>
+
+              {/* Registration Notice or Button */}
+              {!registrationOpen ? (
+                <div className="inline-block bg-yellow-500/20 backdrop-blur-md border-2 border-yellow-400/50 rounded-xl px-8 py-4 mb-4 shadow-lg">
+                  <p className="text-yellow-300 font-bold text-xl drop-shadow-md">
+                    📅 Registration Opens May 28, 2026
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <Link
+                    href="/register"
+                    className="inline-block bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-10 py-4 rounded-xl text-xl font-bold transition-all shadow-lg shadow-cyan-500/50 hover:shadow-cyan-500/70 hover:scale-105"
+                  >
+                    Register Your Group
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-12">
-        {/* Photo Gallery */}
+        {/* Welcome Message */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <div className="bg-white border-2 border-slate-200 rounded-lg p-8 shadow-lg">
+            <div className="text-center mb-6">
+              <h2 className="text-3xl font-serif font-bold text-slate-800 mb-2">
+                Welcome from SDA Lowry Tamil Church
+              </h2>
+              <div className="w-24 h-1 bg-slate-300 mx-auto mb-6"></div>
+            </div>
+            <p className="text-slate-700 leading-relaxed text-center mb-4 text-lg">
+              Dear Brothers and Sisters in Christ,
+            </p>
+            <p className="text-slate-600 leading-relaxed text-center mb-4">
+              On behalf of the <strong>Seventh-day Adventist Lowry Tamil Church</strong>, we warmly welcome you
+              to this special Bible Exhibition. This is a blessed opportunity to deepen your understanding
+              of God's Word and experience the richness of Scripture in a meaningful way.
+            </p>
+            <p className="text-slate-600 leading-relaxed text-center mb-4">
+              We encourage you and your church family to join us for this spiritual journey. Whether you
+              prefer Tamil or English, our guided tours will help illuminate the timeless truths and
+              profound wisdom found in the Holy Bible.
+            </p>
+            <p className="text-slate-700 leading-relaxed text-center font-medium italic">
+              "For the word of God is living and active, sharper than any two-edged sword..."
+              <br />
+              <span className="text-sm text-slate-500">— Hebrews 4:12</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Exhibition Models Gallery */}
         <div className="max-w-5xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-cyan-400 mb-8">
-            Exhibition Models Gallery
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-center text-slate-800 mb-2">
+            Exhibition Models Preview
           </h2>
-          <div className="bg-slate-800 rounded-lg p-6 shadow-2xl">
-            <div className="relative aspect-video bg-slate-900 rounded-lg overflow-hidden mb-4">
+          <p className="text-center text-slate-600 mb-8">
+            Explore the biblical stories through detailed 3D models and dioramas
+          </p>
+          <div className="bg-white rounded-lg p-6 shadow-xl border-2 border-slate-200">
+            <div className="relative aspect-video bg-slate-100 rounded-lg overflow-hidden mb-4">
               <img
                 src={`/models/${modelPhotos[currentImageIndex].file}`}
                 alt={modelPhotos[currentImageIndex].name}
@@ -139,22 +213,24 @@ export default function Home() {
               />
               <button
                 onClick={prevImage}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-slate-900/80 hover:bg-slate-900 text-white p-3 rounded-full transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-800 p-3 rounded-full transition-colors shadow-lg"
+                aria-label="Previous image"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button
                 onClick={nextImage}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-slate-900/80 hover:bg-slate-900 text-white p-3 rounded-full transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-800 p-3 rounded-full transition-colors shadow-lg"
+                aria-label="Next image"
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
             </div>
             <div className="text-center">
-              <h3 className="text-xl font-bold text-white mb-2">
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
                 {modelPhotos[currentImageIndex].name}
               </h3>
-              <p className="text-cyan-400">
+              <p className="text-slate-600">
                 Model {currentImageIndex + 1} of {modelPhotos.length}
               </p>
             </div>
@@ -166,9 +242,10 @@ export default function Home() {
                   onClick={() => setCurrentImageIndex(index)}
                   className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                     index === currentImageIndex
-                      ? 'border-cyan-400 scale-110'
-                      : 'border-slate-600 opacity-60 hover:opacity-100'
+                      ? 'border-cyan-500 scale-110 shadow-lg'
+                      : 'border-slate-300 opacity-60 hover:opacity-100 hover:border-slate-400'
                   }`}
+                  aria-label={`View ${photo.name}`}
                 >
                   <img
                     src={`/models/${photo.file}`}
@@ -183,13 +260,13 @@ export default function Home() {
 
         {/* Lookup Section */}
         <div className="max-w-4xl mx-auto mb-16">
-          <div className="bg-slate-800 border-2 border-cyan-500/30 rounded-lg p-8 shadow-xl">
+          <div className="bg-white border-2 border-slate-200 rounded-lg p-8 shadow-lg">
             <div className="text-center mb-6">
-              <Search className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">
+              <Search className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+              <h2 className="text-2xl font-serif font-bold text-slate-800 mb-2">
                 Already Registered?
               </h2>
-              <p className="text-slate-300">
+              <p className="text-slate-600">
                 Enter your phone number to view or manage your registration
               </p>
             </div>
@@ -202,14 +279,14 @@ export default function Home() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Enter your phone number"
-                  className="flex-1 px-4 py-3 bg-slate-900 border-2 border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-white text-lg"
+                  className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-lg"
                   minLength={10}
                   maxLength={20}
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-slate-900 rounded-lg font-bold disabled:bg-slate-600 transition-colors flex items-center justify-center gap-2"
+                  className="px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white rounded-lg font-semibold disabled:bg-slate-400 transition-colors flex items-center justify-center gap-2"
                 >
                   <Search className="w-5 h-5" />
                   {loading ? 'Searching...' : 'Find'}
@@ -219,49 +296,119 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Schedule */}
-        <div className="max-w-4xl mx-auto mb-16">
-          <h2 className="text-3xl font-bold text-center text-yellow-400 mb-8">
-            Exhibition Hours
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-slate-800 border-2 border-cyan-500/30 rounded-lg p-6">
-              <h3 className="text-xl font-bold text-cyan-400 mb-4">Saturdays</h3>
-              <p className="text-white text-lg mb-2">1:30 PM - 5:00 PM</p>
-              <p className="text-white text-lg">6:00 PM - 8:00 PM</p>
-              <p className="text-slate-400 text-sm mt-2">Break: 5:00 - 6:00 PM</p>
+        {/* Features */}
+        <div className="grid md:grid-cols-3 gap-8 mb-16 max-w-5xl mx-auto">
+          <div className="text-center">
+            <div className="bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-8 h-8 text-slate-700" />
             </div>
-            <div className="bg-slate-800 border-2 border-yellow-500/30 rounded-lg p-6">
-              <h3 className="text-xl font-bold text-yellow-400 mb-4">Sundays</h3>
-              <p className="text-white text-lg">9:30 AM - 8:00 PM</p>
-              <p className="text-slate-400 text-sm mt-2">Continuous Session</p>
-            </div>
-          </div>
-          
-          <div className="mt-6 bg-slate-800 border-2 border-purple-500/30 rounded-lg p-6">
-            <h3 className="text-lg font-bold text-purple-400 mb-3 flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              Weekdays (Mon-Thu): 5:00 PM - 8:00 PM
-            </h3>
-            <p className="text-slate-300 text-sm mb-2">
-              ⚠️ Open to public - May experience delays due to walk-in visitors
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">Flexible Scheduling</h3>
+            <p className="text-slate-600 text-sm">
+              Choose a date and time that works best for your church group
             </p>
-            <p className="text-slate-400 text-sm">
-              📞 For exclusive group bookings or Friday slots, call the church office
+          </div>
+
+          <div className="text-center">
+            <div className="bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8 text-slate-700" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">Group Visits</h3>
+            <p className="text-slate-600 text-sm">
+              Bring your entire congregation for a shared spiritual experience
+            </p>
+          </div>
+
+          <div className="text-center">
+            <div className="bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Heart className="w-8 h-8 text-slate-700" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">Guided Tours</h3>
+            <p className="text-slate-600 text-sm">
+              Audio guides in Tamil and English to enrich your understanding
             </p>
           </div>
         </div>
 
-        {/* Features */}
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg p-8">
-            <h3 className="text-2xl font-bold text-yellow-400 mb-4">
-              Audio Guides Available
-            </h3>
-            <p className="text-white text-3xl font-bold">Tamil & English</p>
-            <p className="text-slate-300 mt-4">
-              Free admission • No registration charges
-            </p>
+        {/* Schedule */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <div className="bg-white border-2 border-slate-200 rounded-lg p-8 shadow-sm">
+            <h2 className="text-2xl font-serif font-semibold text-slate-800 mb-6 text-center">
+              Exhibition Hours
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8 mb-6">
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h3 className="text-lg font-semibold text-slate-700 mb-2">
+                  Saturdays
+                </h3>
+                <p className="text-slate-600 text-sm mb-2">Two Sessions</p>
+                <p className="text-xl font-bold text-slate-800">1:30 PM - 5:00 PM</p>
+                <p className="text-xl font-bold text-slate-800">6:00 PM - 8:00 PM</p>
+                <p className="text-xs text-slate-500 mt-2">Break: 5:00 PM - 6:00 PM</p>
+              </div>
+              <div className="border-l-4 border-green-500 pl-4">
+                <h3 className="text-lg font-semibold text-slate-700 mb-2">
+                  Sundays
+                </h3>
+                <p className="text-slate-600 text-sm mb-2">Continuous Session</p>
+                <p className="text-xl font-bold text-slate-800">9:30 AM - 8:00 PM</p>
+                <p className="text-xs text-slate-500 mt-2">No break</p>
+              </div>
+            </div>
+
+            {/* Weekday Notice */}
+            <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Weekdays (Mon-Thu)
+              </h3>
+              
+              <div className="bg-white rounded-lg p-4 mb-3">
+                <p className="text-purple-900 font-bold text-lg mb-2">
+                  ✅ Online Registration Available
+                </p>
+                <p className="text-xl font-bold text-purple-800 mb-2">
+                  5:00 PM - 8:00 PM
+                </p>
+                <p className="text-sm text-purple-700">
+                  Book your slot directly through this portal
+                </p>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-300 rounded-lg p-4">
+                <p className="text-amber-900 font-semibold mb-2">
+                  ⏰ Please Note: Open to Public
+                </p>
+                <p className="text-sm text-amber-800 mb-2">
+                  Weekday evening sessions (5-8 PM) are open to the general public. Your group may experience slight delays as we accommodate walk-in visitors.
+                </p>
+                <p className="text-sm text-amber-900 font-medium">
+                  💡 For exclusive group time or other hours, please call the church office to arrange a private booking.
+                </p>
+              </div>
+            </div>
+            
+            {/* Friday Special Notice */}
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-amber-900 mb-2 flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Friday Sessions - Call to Register
+              </h3>
+              <p className="text-amber-800 mb-3">
+                Friday slots are available <strong>before and after vesper service</strong> by phone registration only.
+              </p>
+              <p className="text-amber-900 font-semibold">
+                📞 Please call the church office to book Friday slots
+              </p>
+            </div>
+
+            {/* Languages */}
+            <div className="text-center pt-4 border-t border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-700 mb-2">
+                Audio Guides Available
+              </h3>
+              <p className="text-2xl font-bold text-slate-800 mb-2">Tamil & English</p>
+              <p className="text-slate-600 text-sm">Free admission • No registration charges</p>
+            </div>
           </div>
         </div>
       </div>
