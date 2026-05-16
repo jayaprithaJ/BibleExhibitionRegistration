@@ -87,23 +87,25 @@ export default function Home() {
             <p className="text-sm text-gray-200 drop-shadow-md">— Psalm 119:105</p>
           </div>
           
-          {/* Inauguration Notice */}
-          <div className="inline-block bg-gradient-to-r from-purple-600 to-purple-700 px-8 py-4 rounded-lg mb-4 shadow-xl border-2 border-purple-400">
-            <p className="text-white font-bold text-xl mb-1">🎉 Grand Inauguration</p>
-            <p className="text-purple-100 text-lg">June 5, 2026 • 6:30 PM</p>
-          </div>
-          
-          {/* Vespers Program Notice */}
-          <div className="inline-block bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 rounded-lg mb-6 shadow-xl border-2 border-blue-400">
-            <p className="text-white font-bold text-lg mb-1">✨ Special Children's Program</p>
-            <p className="text-blue-100 text-lg">"Holy Spirit Unleashed"</p>
-            <p className="text-blue-200 text-sm mt-1">During Vespers</p>
-          </div>
-          
-          <div className="inline-block bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg mb-8">
-            <p className="text-slate-800 font-medium">
-              Exhibition: June 5-21, 2026
-            </p>
+          {/* Event Details - Three Boxes in a Row */}
+          <div className="flex flex-wrap justify-center gap-4 mb-8 max-w-5xl mx-auto">
+            {/* Inauguration Notice */}
+            <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4 rounded-lg shadow-xl border-2 border-purple-400 flex-shrink-0">
+              <p className="text-white font-bold text-lg mb-1">🎉 Grand Inauguration</p>
+              <p className="text-purple-100">June 5, 2026 • 6:30 PM</p>
+            </div>
+            
+            {/* Vespers Program Notice */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 rounded-lg shadow-xl border-2 border-blue-400 flex-shrink-0">
+              <p className="text-white font-bold text-lg mb-1">✨ Special Children's Program</p>
+              <p className="text-blue-100">"Holy Spirit Unleashed"</p>
+              <p className="text-blue-200 text-sm mt-1">During Vespers</p>
+            </div>
+            
+            {/* Exhibition Dates */}
+            <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-lg shadow-xl flex-shrink-0">
+              <p className="text-slate-800 font-bold text-lg">Exhibition: June 5-21, 2026</p>
+            </div>
           </div>
           <div>
             {registrationOpen ? (
