@@ -144,10 +144,13 @@ export default function Home() {
         {/* Exhibition Models Gallery */}
         <div className="max-w-5xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-center text-slate-800 mb-2">
-            Exhibition Models Preview
+            Expected Sample Models
           </h2>
-          <p className="text-center text-slate-600 mb-8">
-            Explore the biblical stories through detailed 3D models and dioramas
+          <p className="text-center text-slate-600 mb-4">
+            AI-generated concept images of biblical stories we plan to create
+          </p>
+          <p className="text-center text-amber-700 text-sm mb-8 italic">
+            Note: Actual exhibition models may differ from these concept images
           </p>
           <div className="bg-white rounded-lg p-6 shadow-xl border-2 border-slate-200">
             <div className="relative aspect-video bg-slate-100 rounded-lg overflow-hidden mb-4">
