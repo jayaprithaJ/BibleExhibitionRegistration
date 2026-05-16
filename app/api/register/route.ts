@@ -5,6 +5,29 @@ import type { RegistrationInput } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if registration is open (after March 28, 2026)
+    const registrationOpenDate = new Date('2026-03-28T00:00:00+05:30'); // March 28, 2026 IST
+    const now = new Date();
+    
+    if (now < registrationOpenDate) {
+      const formatter = new Intl.DateTimeFormat('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      const openDateStr = formatter.format(registrationOpenDate);
+      
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Registration will open on ${openDateStr}. Please check back after this date.`,
+          errorCode: 'REGISTRATION_NOT_OPEN',
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     
     // Validate input
