@@ -48,10 +48,12 @@ function ConfirmationContent() {
   }, [registrationNumber]);
 
   const getQRCodeValue = () => {
+    // Use relative URL or check if window is available
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
     if (!details?.qr_token) {
-      return `${window.location.origin}/confirmation?reg=${registrationNumber}`;
+      return `${origin}/confirmation?reg=${registrationNumber}`;
     }
-    return `${window.location.origin}/qr/${details.qr_token}`;
+    return `${origin}/qr/${details.qr_token}`;
   };
 
   if (!registrationNumber) {

@@ -22,7 +22,6 @@ export async function GET(
       created_at: string;
       checked_in: boolean;
       qr_token: string;
-      slot_info: string;
     }>(
       `SELECT
         r.id,
@@ -37,20 +36,9 @@ export async function GET(
         r.email,
         r.created_at,
         r.checked_in,
-        r.qr_token,
-        STRING_AGG(
-          'Slot ' || sa.group_sequence || ': ' || s.slot_time::TEXT || ' (' || sa.language || ': ' || sa.people_count || ')',
-          ', '
-          ORDER BY sa.group_sequence
-        ) as slot_info
+        r.qr_token
       FROM registrations r
-      LEFT JOIN slot_assignments sa ON r.id = sa.registration_id
-      LEFT JOIN slots s ON sa.slot_id = s.id
-      WHERE r.registration_number = $1
-      GROUP BY r.id, r.registration_number, r.name, r.church_name,
-               r.preferred_date, r.total_people, r.tamil_count,
-               r.english_count, r.phone, r.email, r.created_at,
-               r.checked_in, r.qr_token`,
+      WHERE r.registration_number = $1`,
       [registrationNumber]
     );
 
@@ -61,9 +49,33 @@ export async function GET(
       );
     }
 
+    // Get slot assignments separately
+    const slots = await query<{
+      language: string;
+      slot_date: string;
+      slot_time: string;
+      people_count: number;
+      group_sequence: number;
+    }>(
+      `SELECT
+        sa.language,
+        s.slot_date,
+        s.slot_time,
+        sa.people_count,
+        sa.group_sequence
+      FROM slot_assignments sa
+      JOIN slots s ON sa.slot_id = s.id
+      WHERE sa.registration_id = $1
+      ORDER BY sa.group_sequence`,
+      [registrations[0].id]
+    );
+
     return NextResponse.json({
       success: true,
-      registration: registrations[0],
+      registration: {
+        ...registrations[0],
+        slots: slots,
+      },
     });
   } catch (error) {
     console.error('Error fetching registration:', error);
