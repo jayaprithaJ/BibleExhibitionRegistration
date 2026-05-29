@@ -34,12 +34,18 @@ export async function GET() {
         r.created_at,
         r.checked_in,
         r.checked_in_at,
-        STRING_AGG(
-          'Slot ' || sa.group_sequence || ': ' || s.slot_time::TEXT || ' (' || sa.language || ': ' || sa.people_count || ')',
-          ', '
-          ORDER BY sa.group_sequence
+        COALESCE(
+          STRING_AGG(
+            'Slot ' || sa.group_sequence || ': ' || s.slot_time::TEXT || ' (' || sa.language || ': ' || sa.people_count || ')',
+            ', '
+            ORDER BY sa.group_sequence
+          ),
+          'Walk-in (No slot)'
         ) as slot_info,
-        STRING_AGG(DISTINCT s.slot_time::TEXT, ', ' ORDER BY s.slot_time::TEXT) as slot_times
+        COALESCE(
+          STRING_AGG(DISTINCT s.slot_time::TEXT, ', ' ORDER BY s.slot_time::TEXT),
+          ''
+        ) as slot_times
       FROM registrations r
       LEFT JOIN slot_assignments sa ON r.id = sa.registration_id
       LEFT JOIN slots s ON sa.slot_id = s.id
