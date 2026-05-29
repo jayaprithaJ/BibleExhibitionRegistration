@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Insert spot registration into database
     // Note: No slot assignments for spot registrations
+    // Set all people to tamil_count to satisfy database constraints
     await query(
       `INSERT INTO registrations (
         registration_number,
@@ -75,8 +76,8 @@ export async function POST(request: NextRequest) {
         churchName,
         istDate, // Use current date as preferred_date
         totalPeople,
-        0, // No language split for spot registrations
-        0,
+        totalPeople, // Set all to tamil to satisfy constraint
+        0, // english_count = 0
         phone || '',
         email || '',
         qrToken,
