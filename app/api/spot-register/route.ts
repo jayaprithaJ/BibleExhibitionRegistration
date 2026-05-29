@@ -40,21 +40,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate registration number with SPOT prefix
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const random = crypto.randomBytes(3).toString('hex').toUpperCase();
-    const registrationNumber = `BE-SPOT${timestamp}-${random}`;
+    // Generate registration number with SPOT prefix (max 20 chars)
+    // Format: BE-SPT[6-char-random]
+    const random = crypto.randomBytes(4).toString('hex').toUpperCase().substring(0, 8);
+    const registrationNumber = `BE-SPT${random}`;
 
-    // Generate QR token
-    const qrToken = crypto.randomBytes(32).toString('hex');
+    // Generate QR token (max 64 chars for VARCHAR(64))
+    const qrToken = crypto.randomBytes(32).toString('hex'); // 64 chars
 
-    // Get current date and time in IST
+    // Get current date and time
     const now = new Date();
-    const istDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    
+    // Format date for PostgreSQL DATE type (YYYY-MM-DD)
+    const preferredDate = now.toISOString().split('T')[0];
 
     // Insert spot registration into database
     // Note: No slot assignments for spot registrations
-    await query(
+    // Set all people to tamil_count to satisfy database constraints
+    const result = await query(
       `INSERT INTO registrations (
         registration_number,
         name,
@@ -66,31 +69,32 @@ export async function POST(request: NextRequest) {
         phone,
         email,
         qr_token,
-        created_at,
         checked_in
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING id`,
       [
         registrationNumber,
         name,
         churchName,
-        istDate, // Use current date as preferred_date
+        preferredDate, // Use ISO date string (YYYY-MM-DD)
         totalPeople,
-        0, // No language split for spot registrations
-        0,
+        totalPeople, // Set all to tamil to satisfy constraint
+        0, // english_count = 0
         phone || '',
         email || '',
         qrToken,
-        now,
         false // Not checked in yet
       ]
     );
+
+    console.log('Spot registration created:', result);
 
     return NextResponse.json({
       success: true,
       registrationNumber,
       qrToken,
       message: 'Spot registration successful',
-      registeredAt: istDate.toISOString(),
+      registeredAt: now.toISOString(),
     });
   } catch (error) {
     console.error('Spot registration error:', error);
