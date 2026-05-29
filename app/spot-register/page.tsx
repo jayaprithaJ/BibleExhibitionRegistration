@@ -118,8 +118,7 @@ export default function SpotRegisterPage() {
 
           <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
             <p className="text-sm text-blue-800">
-              <strong>Note:</strong> This form is for on-site walk-in registrations only. 
-              No time slot selection needed - visitors will be accommodated immediately.
+              <strong>Note:</strong> This form is for on-site walk-in registrations only. Please fill in all the required fields.
             </p>
           </div>
 
