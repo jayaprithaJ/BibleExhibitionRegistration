@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Users, Calendar, TrendingUp, Clock, RefreshCw, Trash2, List, Filter, CheckCircle, XCircle, Layers, Settings } from 'lucide-react';
+import { Users, Calendar, TrendingUp, Clock, RefreshCw, Trash2, List, Filter, CheckCircle, XCircle, Layers, Settings, Check } from 'lucide-react';
 
 interface DateBreakdown {
   slot_date: string;
@@ -63,7 +63,11 @@ export default function AdminPage() {
   const [showRegistrations, setShowRegistrations] = useState(true);
   const [showBatches, setShowBatches] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [checkingIn, setCheckingIn] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'registrations' | 'batches'>('batches');
+  const [adminPassword, setAdminPassword] = useState<string>('');
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [pendingCheckIn, setPendingCheckIn] = useState<{regNumber: string, type: 'registration' | 'batch'} | null>(null);
   
   // Filter states
   const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'pending'>('all');
@@ -150,6 +154,76 @@ export default function AdminPage() {
       alert('Error deleting registration');
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleCheckIn = async (regNumber: string, type: 'registration' | 'batch') => {
+    // If no password stored, prompt for it
+    if (!adminPassword) {
+      setPendingCheckIn({ regNumber, type });
+      setShowPasswordPrompt(true);
+      return;
+    }
+
+    // Proceed with check-in
+    await performCheckIn(regNumber);
+  };
+
+  const performCheckIn = async (regNumber: string) => {
+    setCheckingIn(regNumber);
+    try {
+      const response = await fetch('/api/checkin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          registration_number: regNumber,
+          admin_password: adminPassword,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        if (data.alreadyCheckedIn) {
+          alert(`Already checked in at ${new Date(data.registration.checkedInAt).toLocaleString()}`);
+        } else {
+          alert('Check-in successful!');
+        }
+        // Refresh data
+        await Promise.all([
+          fetchRegistrations(),
+          fetchBatches(),
+          fetchStats(),
+        ]);
+      } else {
+        alert(`Check-in failed: ${data.error}`);
+        // If unauthorized, clear password
+        if (response.status === 401) {
+          setAdminPassword('');
+          setShowPasswordPrompt(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error during check-in:', error);
+      alert('Error during check-in');
+    } finally {
+      setCheckingIn(null);
+    }
+  };
+
+  const handlePasswordSubmit = async () => {
+    if (!adminPassword.trim()) {
+      alert('Please enter admin password');
+      return;
+    }
+
+    setShowPasswordPrompt(false);
+    
+    if (pendingCheckIn) {
+      await performCheckIn(pendingCheckIn.regNumber);
+      setPendingCheckIn(null);
     }
   };
 
@@ -622,10 +696,16 @@ export default function AdminPage() {
                             <span className="text-xs font-medium">Completed</span>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1 text-yellow-600">
-                            <Clock className="w-4 h-4" />
-                            <span className="text-xs font-medium">Pending</span>
-                          </div>
+                          <button
+                            onClick={() => handleCheckIn(batch.registration_number, 'batch')}
+                            disabled={checkingIn === batch.registration_number}
+                            className="flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 disabled:opacity-50 transition-colors"
+                          >
+                            <Check className="w-4 h-4" />
+                            <span className="text-xs font-medium">
+                              {checkingIn === batch.registration_number ? 'Checking...' : 'Mark Done'}
+                            </span>
+                          </button>
                         )}
                       </td>
                       <td className="py-3 px-4 text-center">
@@ -672,6 +752,7 @@ export default function AdminPage() {
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Reg #</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Name</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Phone</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Church</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
                     <th className="text-center py-3 px-4 font-semibold text-gray-700">People</th>
@@ -689,14 +770,25 @@ export default function AdminPage() {
                             <span className="text-xs font-medium">Done</span>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1 text-yellow-600">
-                            <Clock className="w-4 h-4" />
-                            <span className="text-xs font-medium">Pending</span>
-                          </div>
+                          <button
+                            onClick={() => handleCheckIn(reg.registration_number, 'registration')}
+                            disabled={checkingIn === reg.registration_number}
+                            className="flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 disabled:opacity-50 transition-colors"
+                          >
+                            <Check className="w-4 h-4" />
+                            <span className="text-xs font-medium">
+                              {checkingIn === reg.registration_number ? 'Checking...' : 'Mark Done'}
+                            </span>
+                          </button>
                         )}
                       </td>
                       <td className="py-3 px-4 font-mono text-sm">{reg.registration_number}</td>
                       <td className="py-3 px-4">{reg.name}</td>
+                      <td className="py-3 px-4">
+                        <a href={`tel:${reg.phone}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                          {reg.phone || 'N/A'}
+                        </a>
+                      </td>
                       <td className="py-3 px-4">{reg.church_name}</td>
                       <td className="py-3 px-4">{formatDate(reg.preferred_date)}</td>
                       <td className="py-3 px-4 text-center">
@@ -711,20 +803,32 @@ export default function AdminPage() {
                         {reg.slot_info || 'No slots assigned'}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <button
-                          onClick={() => handleDelete(reg.id, reg.registration_number)}
-                          disabled={deleting === reg.id}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 transition-colors text-sm"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          {deleting === reg.id ? 'Deleting...' : 'Delete'}
-                        </button>
+                        <div className="flex gap-2 justify-center">
+                          {!reg.checked_in && (
+                            <button
+                              onClick={() => handleCheckIn(reg.registration_number, 'registration')}
+                              disabled={checkingIn === reg.registration_number}
+                              className="inline-flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 transition-colors text-sm"
+                            >
+                              <Check className="w-3 h-3" />
+                              {checkingIn === reg.registration_number ? 'Checking...' : 'Check In'}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDelete(reg.id, reg.registration_number)}
+                            disabled={deleting === reg.id}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 transition-colors text-sm"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            {deleting === reg.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                   {filteredRegistrations.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="py-8 text-center text-gray-500">
+                      <td colSpan={9} className="py-8 text-center text-gray-500">
                         {registrations.length === 0 ? 'No registrations found' : 'No registrations match the selected filters'}
                       </td>
                     </tr>
@@ -761,6 +865,45 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+
+        {/* Password Prompt Modal */}
+        {showPasswordPrompt && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Admin Authentication</h3>
+              <p className="text-gray-600 mb-4">
+                Enter admin password to perform check-in operations
+              </p>
+              <input
+                type="password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                placeholder="Admin Password"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
+                autoFocus
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={handlePasswordSubmit}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Submit
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPasswordPrompt(false);
+                    setPendingCheckIn(null);
+                    setAdminPassword('');
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

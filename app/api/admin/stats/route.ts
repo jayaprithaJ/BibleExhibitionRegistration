@@ -29,7 +29,7 @@ export async function GET() {
       FROM slots`
     );
 
-    // Get date-wise breakdown
+    // Get date-wise breakdown - show ALL dates including those with no registrations
     const dateBreakdown = await query<{
       slot_date: string;
       day_type: string;
@@ -40,20 +40,20 @@ export async function GET() {
       total_slots: number;
       full_slots: number;
     }>(
-      `SELECT 
-        s.slot_date,
+      `SELECT
+        es.exhibition_date as slot_date,
         es.day_type,
-        SUM(s.capacity) as total_capacity,
-        SUM(s.filled) as filled_capacity,
-        SUM(s.capacity - s.filled) as available_capacity,
-        ROUND((SUM(s.filled)::numeric / NULLIF(SUM(s.capacity), 0)) * 100, 1) as fill_percentage,
-        COUNT(*) as total_slots,
+        COALESCE(SUM(s.capacity), 0) as total_capacity,
+        COALESCE(SUM(s.filled), 0) as filled_capacity,
+        COALESCE(SUM(s.capacity - s.filled), 0) as available_capacity,
+        ROUND((COALESCE(SUM(s.filled), 0)::numeric / NULLIF(SUM(s.capacity), 0)) * 100, 1) as fill_percentage,
+        COUNT(s.id) as total_slots,
         COUNT(CASE WHEN s.status = 'full' THEN 1 END) as full_slots
-      FROM slots s
-      JOIN exhibition_schedule es ON s.slot_date = es.exhibition_date
+      FROM exhibition_schedule es
+      LEFT JOIN slots s ON s.slot_date = es.exhibition_date
       WHERE es.is_active = true
-      GROUP BY s.slot_date, es.day_type
-      ORDER BY s.slot_date`
+      GROUP BY es.exhibition_date, es.day_type
+      ORDER BY es.exhibition_date`
     );
 
     return NextResponse.json(
