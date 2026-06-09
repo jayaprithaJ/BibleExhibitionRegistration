@@ -388,7 +388,7 @@ export default function AdminPage() {
               <span className="text-sm text-gray-500">Today</span>
             </div>
             <p className="text-3xl font-bold text-gray-900">{stats.todayRegistrations}</p>
-            <p className="text-sm text-gray-600 mt-1">Today's Registrations</p>
+            <p className="text-sm text-gray-600 mt-1">People Registered Today</p>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">

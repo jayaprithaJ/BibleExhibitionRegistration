@@ -7,11 +7,13 @@ export async function GET() {
     const registrationStats = await query<{
       total_registrations: number;
       today_registrations: number;
+      today_people: number;
       total_people: number;
     }>(
-      `SELECT 
+      `SELECT
         COUNT(*) as total_registrations,
         COUNT(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 END) as today_registrations,
+        COALESCE(SUM(CASE WHEN DATE(created_at) = CURRENT_DATE THEN total_people ELSE 0 END), 0) as today_people,
         COALESCE(SUM(total_people), 0) as total_people
       FROM registrations`
     );
@@ -29,7 +31,7 @@ export async function GET() {
       FROM slots`
     );
 
-    // Get date-wise breakdown - show ALL dates including those with no registrations
+    // Get date-wise breakdown - show ALL dates including closed weekdays
     const dateBreakdown = await query<{
       slot_date: string;
       day_type: string;
@@ -51,7 +53,6 @@ export async function GET() {
         COUNT(CASE WHEN s.status = 'full' THEN 1 END) as full_slots
       FROM exhibition_schedule es
       LEFT JOIN slots s ON s.slot_date = es.exhibition_date
-      WHERE es.is_active = true
       GROUP BY es.exhibition_date, es.day_type
       ORDER BY es.exhibition_date`
     );
@@ -61,7 +62,7 @@ export async function GET() {
         success: true,
         stats: {
           totalRegistrations: registrationStats[0].total_registrations,
-          todayRegistrations: registrationStats[0].today_registrations,
+          todayRegistrations: registrationStats[0].today_people, // Changed to show people count instead of registration count
           totalPeople: registrationStats[0].total_people,
           totalCapacity: slotStats[0].total_capacity,
           filledCapacity: slotStats[0].filled_capacity,
