@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         qr_token,
         checked_in
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-      RETURNING id`,
+      RETURNING id, registration_number`,
       [
         registrationNumber,
         name,
@@ -80,8 +80,8 @@ export async function POST(request: NextRequest) {
         totalPeople,
         totalPeople, // Set all to tamil to satisfy constraint
         0, // english_count = 0
-        phone || '',
-        email || '',
+        phone || null,
+        email || null,
         qrToken,
         false // Not checked in yet
       ]

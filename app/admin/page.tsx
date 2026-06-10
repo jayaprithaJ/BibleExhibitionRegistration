@@ -9,6 +9,7 @@ interface DateBreakdown {
   day_type: string;
   total_capacity: number;
   filled_capacity: number;
+  registered_people: number;
   available_capacity: number;
   fill_percentage: number;
   total_slots: number;
@@ -99,10 +100,11 @@ export default function AdminPage() {
 
   const fetchRegistrations = async () => {
     try {
-      const response = await fetch('/api/admin/registrations', {
+      const response = await fetch(`/api/admin/registrations?t=${Date.now()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       });
       const data = await response.json();
@@ -116,10 +118,11 @@ export default function AdminPage() {
 
   const fetchBatches = async () => {
     try {
-      const response = await fetch('/api/admin/batches', {
+      const response = await fetch(`/api/admin/batches?t=${Date.now()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       });
       const data = await response.json();
@@ -186,17 +189,22 @@ export default function AdminPage() {
       const data = await response.json();
       
       if (data.success) {
-        if (data.alreadyCheckedIn) {
-          alert(`Already checked in at ${new Date(data.registration.checkedInAt).toLocaleString()}`);
-        } else {
-          alert('Check-in successful!');
-        }
+        // Small delay to ensure database is updated
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         // Refresh data
         await Promise.all([
           fetchRegistrations(),
           fetchBatches(),
           fetchStats(),
         ]);
+        
+        // Then show message
+        if (data.alreadyCheckedIn) {
+          alert(`Already checked in at ${new Date(data.registration.checkedInAt).toLocaleString()}`);
+        } else {
+          alert('Check-in successful!');
+        }
       } else {
         alert(`Check-in failed: ${data.error}`);
         // If unauthorized, clear password
@@ -427,17 +435,19 @@ export default function AdminPage() {
                 <tr className="border-b-2 border-gray-200">
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
                   <th className="text-center py-3 px-4 font-semibold text-gray-700">Capacity</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Filled</th>
+                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Registered</th>
+                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Filled (Slots)</th>
                   <th className="text-center py-3 px-4 font-semibold text-gray-700">Available</th>
                   <th className="text-center py-3 px-4 font-semibold text-gray-700">Fill %</th>
                   <th className="text-center py-3 px-4 font-semibold text-gray-700">Status</th>
                 </tr>
               </thead>
               <tbody>
-                {dateBreakdown.map((date, index) => (
+                {dateBreakdown.filter(date => date.total_capacity > 0).map((date, index) => (
                   <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4 font-medium">{formatDate(date.slot_date)}</td>
                     <td className="py-3 px-4 text-center">{date.total_capacity}</td>
+                    <td className="py-3 px-4 text-center font-semibold text-purple-600">{date.registered_people}</td>
                     <td className="py-3 px-4 text-center font-semibold text-blue-600">{date.filled_capacity}</td>
                     <td className="py-3 px-4 text-center font-semibold text-green-600">{date.available_capacity}</td>
                     <td className="py-3 px-4 text-center">

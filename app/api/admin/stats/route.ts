@@ -32,11 +32,13 @@ export async function GET() {
     );
 
     // Get date-wise breakdown - show ALL dates including closed weekdays
+    // Include both slot fills AND registration counts
     const dateBreakdown = await query<{
       slot_date: string;
       day_type: string;
       total_capacity: number;
       filled_capacity: number;
+      registered_people: number;
       available_capacity: number;
       fill_percentage: number;
       total_slots: number;
@@ -47,12 +49,14 @@ export async function GET() {
         es.day_type,
         COALESCE(SUM(s.capacity), 0) as total_capacity,
         COALESCE(SUM(s.filled), 0) as filled_capacity,
+        COALESCE(SUM(r.total_people), 0) as registered_people,
         COALESCE(SUM(s.capacity - s.filled), 0) as available_capacity,
         ROUND((COALESCE(SUM(s.filled), 0)::numeric / NULLIF(SUM(s.capacity), 0)) * 100, 1) as fill_percentage,
-        COUNT(s.id) as total_slots,
-        COUNT(CASE WHEN s.status = 'full' THEN 1 END) as full_slots
+        COUNT(DISTINCT s.id) as total_slots,
+        COUNT(DISTINCT CASE WHEN s.status = 'full' THEN s.id END) as full_slots
       FROM exhibition_schedule es
       LEFT JOIN slots s ON s.slot_date = es.exhibition_date
+      LEFT JOIN registrations r ON r.preferred_date = es.exhibition_date
       GROUP BY es.exhibition_date, es.day_type
       ORDER BY es.exhibition_date`
     );

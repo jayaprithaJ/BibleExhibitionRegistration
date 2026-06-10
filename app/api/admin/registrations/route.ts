@@ -40,7 +40,10 @@ export async function GET() {
             ', '
             ORDER BY sa.group_sequence
           ),
-          'Walk-in (No slot)'
+          CASE
+            WHEN r.registration_number LIKE 'BE-SPT%' THEN 'Spot Registration (Walk-in)'
+            ELSE 'No slots assigned'
+          END
         ) as slot_info,
         COALESCE(
           STRING_AGG(DISTINCT s.slot_time::TEXT, ', ' ORDER BY s.slot_time::TEXT),
