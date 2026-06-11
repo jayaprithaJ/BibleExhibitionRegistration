@@ -189,10 +189,18 @@ export default function AdminPage() {
       const data = await response.json();
       
       if (data.success) {
-        // Small delay to ensure database is updated
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Longer delay to ensure database is updated
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Refresh data
+        // Refresh data multiple times to ensure update
+        await Promise.all([
+          fetchRegistrations(),
+          fetchBatches(),
+          fetchStats(),
+        ]);
+        
+        // Second refresh after another delay
+        await new Promise(resolve => setTimeout(resolve, 500));
         await Promise.all([
           fetchRegistrations(),
           fetchBatches(),
@@ -201,10 +209,13 @@ export default function AdminPage() {
         
         // Then show message
         if (data.alreadyCheckedIn) {
-          alert(`Already checked in at ${new Date(data.registration.checkedInAt).toLocaleString()}`);
+          alert(`Already checked in at ${new Date(data.registration.checkedInAt).toLocaleString()}\n\nPage will reload to show updated status.`);
         } else {
-          alert('Check-in successful!');
+          alert('Check-in successful!\n\nPage will reload to show updated status.');
         }
+        
+        // Force page reload to clear any caching
+        window.location.reload();
       } else {
         alert(`Check-in failed: ${data.error}`);
         // If unauthorized, clear password
@@ -443,7 +454,7 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {dateBreakdown.filter(date => date.total_capacity > 0).map((date, index) => (
+                {dateBreakdown.filter(date => date.total_capacity > 0 || date.registered_people > 0).map((date, index) => (
                   <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4 font-medium">{formatDate(date.slot_date)}</td>
                     <td className="py-3 px-4 text-center">{date.total_capacity}</td>
