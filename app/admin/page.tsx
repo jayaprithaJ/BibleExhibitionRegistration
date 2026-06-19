@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Users, Calendar, TrendingUp, Clock, RefreshCw, Trash2, List, Filter, CheckCircle, XCircle, Layers, Settings, Check } from 'lucide-react';
+import { Users, Calendar, TrendingUp, Clock, RefreshCw, Trash2, List, Filter, CheckCircle, XCircle, Layers, Settings, Check, Download, FileText } from 'lucide-react';
 
 interface DateBreakdown {
   slot_date: string;
@@ -246,6 +246,78 @@ export default function AdminPage() {
     }
   };
 
+  const downloadReport = () => {
+    const reportContent = `
+BIBLE EXHIBITION 2026 - FINAL REPORT
+Generated on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+================================================================================
+
+REGISTRATION STATISTICS
+================================================================================
+Total Registrations via URL: 4,960
+Total Registrations via QR Code: 104
+
+REGISTRATION BY COUNTRY
+--------------------------------------------------------------------------------
+1. India                                                                    103
+2. United Kingdom                                                             1
+
+REGISTRATION BY CITY (Top 26)
+--------------------------------------------------------------------------------
+ 1. Bengaluru                                                                41
+ 2. Mangaluru                                                                11
+ 3. Navi Mumbai (Ghansoli)                                                    7
+ 4. Chennai                                                                   5
+ 5. Yelahanka                                                                 4
+ 6. Koppana Agrahara                                                          3
+ 7. S.A.S Nagar                                                               3
+ 8. Belvata                                                                   3
+ 9. Hubballi                                                                  2
+10. New Delhi (Block N)                                                       2
+11. Tālīkota                                                                  2
+12. Dommasandra                                                               2
+13. Tiptūr                                                                    2
+14. Navi Mumbai (Reliance Corporate Park)                                     2
+15. Belagavi                                                                  2
+16. Hunasamaranahalli                                                         2
+17. Electronic City Phase I                                                   2
+18. Tamarakutamkudiyiruppu                                                    1
+19. Ballari                                                                   1
+20. Kanakapura                                                                1
+21. Gurugram                                                                  1
+22. Mutge                                                                     1
+23. Cherpulassery                                                             1
+24. Patna (Police Colony)                                                     1
+25. New Delhi (Jasola)                                                        1
+26. London                                                                    1
+
+VISITOR STATISTICS (Till Friday)
+================================================================================
+Total Visitors:                                                           2,824
+  - Adventist (including school):                                        2,655
+  - Non-Adventist & Non-believers:                                          169
+
+VISITOR BREAKDOWN
+--------------------------------------------------------------------------------
+Adventist Percentage:                                                    94.0%
+Non-Adventist Percentage:                                                 6.0%
+
+================================================================================
+Report End
+================================================================================
+    `.trim();
+
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Bible_Exhibition_Report_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     fetchStats();
     fetchRegistrations();
@@ -435,60 +507,140 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Date-wise Breakdown */}
+        {/* Exhibition Report */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Date-wise Slot Status
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Capacity</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Registered</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Filled (Slots)</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Available</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Fill %</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dateBreakdown.filter(date => date.total_capacity > 0 || date.registered_people > 0).map((date, index) => (
-                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">{formatDate(date.slot_date)}</td>
-                    <td className="py-3 px-4 text-center">{date.total_capacity}</td>
-                    <td className="py-3 px-4 text-center font-semibold text-purple-600">{date.registered_people}</td>
-                    <td className="py-3 px-4 text-center font-semibold text-blue-600">{date.filled_capacity}</td>
-                    <td className="py-3 px-4 text-center font-semibold text-green-600">{date.available_capacity}</td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-16 bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${
-                              date.fill_percentage > 80 ? 'bg-red-500' :
-                              date.fill_percentage > 50 ? 'bg-yellow-500' : 'bg-green-500'
-                            }`}
-                            style={{ width: `${date.fill_percentage}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-medium">{date.fill_percentage}%</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                        date.fill_percentage >= 100 ? 'bg-red-100 text-red-700' :
-                        date.fill_percentage >= 80 ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-green-100 text-green-700'
-                      }`}>
-                        {date.fill_percentage >= 100 ? 'Full' :
-                         date.fill_percentage >= 80 ? 'Filling' : 'Available'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <FileText className="w-8 h-8 text-blue-600" />
+              <h2 className="text-2xl font-bold text-gray-900">
+                Exhibition Report
+              </h2>
+            </div>
+            <button
+              onClick={downloadReport}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Download Report
+            </button>
+          </div>
+
+          {/* Registration Statistics */}
+          <div className="mb-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-4 border-b-2 border-blue-500 pb-2">
+              Registration Statistics
+            </h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <p className="text-sm text-gray-600 mb-2">Total Registrations via URL</p>
+                <p className="text-4xl font-bold text-blue-600">4,960</p>
+              </div>
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                <p className="text-sm text-gray-600 mb-2">Total Registrations via QR Code</p>
+                <p className="text-4xl font-bold text-purple-600">104</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Registration by Country */}
+          <div className="mb-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-4 border-b-2 border-green-500 pb-2">
+              Registration by Country
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <span className="font-medium">🇮🇳 India</span>
+                <span className="text-2xl font-bold text-green-600">103</span>
+              </div>
+              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <span className="font-medium">🇬🇧 United Kingdom</span>
+                <span className="text-2xl font-bold text-green-600">1</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Registration by City */}
+          <div className="mb-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-4 border-b-2 border-orange-500 pb-2">
+              Registration by City (Top 26)
+            </h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+              {[
+                { city: 'Bengaluru', count: 41 },
+                { city: 'Mangaluru', count: 11 },
+                { city: 'Navi Mumbai (Ghansoli)', count: 7 },
+                { city: 'Chennai', count: 5 },
+                { city: 'Yelahanka', count: 4 },
+                { city: 'Koppana Agrahara', count: 3 },
+                { city: 'S.A.S Nagar', count: 3 },
+                { city: 'Belvata', count: 3 },
+                { city: 'Hubballi', count: 2 },
+                { city: 'New Delhi (Block N)', count: 2 },
+                { city: 'Tālīkota', count: 2 },
+                { city: 'Dommasandra', count: 2 },
+                { city: 'Tiptūr', count: 2 },
+                { city: 'Navi Mumbai (Reliance Corporate Park)', count: 2 },
+                { city: 'Belagavi', count: 2 },
+                { city: 'Hunasamaranahalli', count: 2 },
+                { city: 'Electronic City Phase I', count: 2 },
+                { city: 'Tamarakutamkudiyiruppu', count: 1 },
+                { city: 'Ballari', count: 1 },
+                { city: 'Kanakapura', count: 1 },
+                { city: 'Gurugram', count: 1 },
+                { city: 'Mutge', count: 1 },
+                { city: 'Cherpulassery', count: 1 },
+                { city: 'Patna (Police Colony)', count: 1 },
+                { city: 'New Delhi (Jasola)', count: 1 },
+                { city: 'London', count: 1 },
+              ].map((item, index) => (
+                <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <span className="text-sm font-medium text-gray-700">{index + 1}. {item.city}</span>
+                  <span className="text-lg font-bold text-orange-600">{item.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Visitor Statistics */}
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-4 border-b-2 border-purple-500 pb-2">
+              Visitor Statistics (Till Friday)
+            </h3>
+            <div className="grid md:grid-cols-3 gap-6 mb-4">
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                <p className="text-sm text-gray-600 mb-2">Total Visitors</p>
+                <p className="text-4xl font-bold text-purple-600">2,824</p>
+              </div>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                <p className="text-sm text-gray-600 mb-2">Adventist (incl. school)</p>
+                <p className="text-4xl font-bold text-green-600">2,655</p>
+                <p className="text-xs text-gray-500 mt-1">94.0%</p>
+              </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                <p className="text-sm text-gray-600 mb-2">Non-Adventist & Non-believers</p>
+                <p className="text-4xl font-bold text-yellow-600">169</p>
+                <p className="text-xs text-gray-500 mt-1">6.0%</p>
+              </div>
+            </div>
+            
+            {/* Visitor Breakdown Chart */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <p className="text-sm font-medium text-gray-700 mb-3">Visitor Breakdown</p>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+                    <div className="bg-green-500 h-8 flex items-center justify-center text-white text-sm font-bold" style={{ width: '94%' }}>
+                      Adventist 94%
+                    </div>
+                  </div>
+                </div>
+                <div style={{ width: '6%' }}>
+                  <div className="w-full bg-yellow-500 rounded-full h-8 flex items-center justify-center text-white text-xs font-bold">
+                    6%
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
