@@ -690,13 +690,11 @@ Report End
                 <thead>
                   <tr className="border-b-2 border-gray-200">
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Reg #</th>
+                    <th className="text-left py-3 px-6 font-semibold text-gray-700 w-40">Reg #</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Name</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Phone</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Church</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
                     <th className="text-center py-3 px-4 font-semibold text-gray-700">People</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Time Slots</th>
                     <th className="text-center py-3 px-4 font-semibold text-gray-700">Actions</th>
                   </tr>
                 </thead>
@@ -722,13 +720,8 @@ Report End
                           </button>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-mono text-sm">{reg.registration_number}</td>
+                      <td className="py-3 px-6 font-mono text-sm">{reg.registration_number}</td>
                       <td className="py-3 px-4">{reg.name}</td>
-                      <td className="py-3 px-4">
-                        <a href={`tel:${reg.phone}`} className="text-blue-600 hover:text-blue-800 hover:underline">
-                          {reg.phone || 'N/A'}
-                        </a>
-                      </td>
                       <td className="py-3 px-4">{reg.church_name}</td>
                       <td className="py-3 px-4">{formatDate(reg.preferred_date)}</td>
                       <td className="py-3 px-4 text-center">
@@ -738,9 +731,6 @@ Report End
                             T:{reg.tamil_count} E:{reg.english_count}
                           </div>
                         </div>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-600">
-                        {reg.slot_info || 'No slots assigned'}
                       </td>
                       <td className="py-3 px-4 text-center">
                         <div className="flex gap-2 justify-center">
@@ -768,7 +758,7 @@ Report End
                   ))}
                   {filteredRegistrations.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="py-8 text-center text-gray-500">
+                      <td colSpan={7} className="py-8 text-center text-gray-500">
                         {registrations.length === 0 ? 'No registrations found' : 'No registrations match the selected filters'}
                       </td>
                     </tr>
