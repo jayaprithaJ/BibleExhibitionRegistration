@@ -45,6 +45,8 @@ export default function AdminPage() {
     totalRegistrations: 0,
     todayRegistrations: 0,
     totalPeople: 0,
+    urlPeople: 0,
+    qrRegistrationCount: 0,
     totalCapacity: 0,
     filledCapacity: 0,
     availableCapacity: 0,
@@ -400,12 +402,14 @@ Report End
             </h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <p className="text-sm text-gray-600 mb-2">Total Registrations via URL</p>
-                <p className="text-4xl font-bold text-blue-600">4,960</p>
+                <p className="text-sm text-gray-600 mb-2">People Registered via URL</p>
+                <p className="text-4xl font-bold text-blue-600">{stats.urlPeople.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-1">Total people count from URL registrations</p>
               </div>
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                <p className="text-sm text-gray-600 mb-2">Total Registrations via QR Code</p>
-                <p className="text-4xl font-bold text-purple-600">104</p>
+                <p className="text-sm text-gray-600 mb-2">QR Code Scans</p>
+                <p className="text-4xl font-bold text-purple-600">{stats.qrRegistrationCount.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-1">Number of QR code registrations</p>
               </div>
             </div>
           </div>

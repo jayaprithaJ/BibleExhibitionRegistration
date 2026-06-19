@@ -18,6 +18,23 @@ export async function GET() {
       FROM registrations`
     );
 
+    // Get URL registrations (people count) and QR registrations (registration count)
+    const urlStats = await query<{
+      total_people: number;
+    }>(
+      `SELECT COALESCE(SUM(total_people), 0) as total_people
+       FROM registrations
+       WHERE registration_number NOT LIKE '%QR%'`
+    );
+
+    const qrStats = await query<{
+      registration_count: number;
+    }>(
+      `SELECT COUNT(*) as registration_count
+       FROM registrations
+       WHERE registration_number LIKE '%QR%'`
+    );
+
     // Get visitor type statistics
     const visitorStats = await query<{
       visitor_type: string;
@@ -81,8 +98,10 @@ export async function GET() {
         success: true,
         stats: {
           totalRegistrations: registrationStats[0].total_registrations,
-          todayRegistrations: registrationStats[0].today_people, // Changed to show people count instead of registration count
+          todayRegistrations: registrationStats[0].today_people,
           totalPeople: registrationStats[0].total_people,
+          urlPeople: urlStats[0].total_people,
+          qrRegistrationCount: qrStats[0].registration_count,
           totalCapacity: slotStats[0].total_capacity,
           filledCapacity: slotStats[0].filled_capacity,
           availableCapacity: slotStats[0].available_capacity,
