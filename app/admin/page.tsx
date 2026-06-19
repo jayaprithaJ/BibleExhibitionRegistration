@@ -34,19 +34,6 @@ interface Registration {
   slot_times: string;
 }
 
-interface Batch {
-  registration_id: string;
-  registration_number: string;
-  church_name: string;
-  slot_date: string;
-  slot_time: string;
-  language: string;
-  people_count: number;
-  group_sequence: number;
-  checked_in: boolean;
-  checked_in_at: string | null;
-}
-
 interface VisitorStats {
   visitor_type: string;
   total_visitors: number;
@@ -66,22 +53,17 @@ export default function AdminPage() {
   const [visitorStats, setVisitorStats] = useState<VisitorStats[]>([]);
   const [dateBreakdown, setDateBreakdown] = useState<DateBreakdown[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
-  const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRegistrations, setShowRegistrations] = useState(true);
-  const [showBatches, setShowBatches] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [checkingIn, setCheckingIn] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'registrations' | 'batches'>('batches');
   const [adminPassword, setAdminPassword] = useState<string>('');
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  const [pendingCheckIn, setPendingCheckIn] = useState<{regNumber: string, type: 'registration' | 'batch'} | null>(null);
+  const [pendingCheckIn, setPendingCheckIn] = useState<{regNumber: string, type: 'registration'} | null>(null);
   
   // Filter states
   const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'pending'>('all');
   const [filterDate, setFilterDate] = useState<string>('all');
-  const [filterTime, setFilterTime] = useState<string>('all');
-  const [filterLanguage, setFilterLanguage] = useState<'all' | 'tamil' | 'english'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const fetchStats = async () => {
@@ -124,24 +106,6 @@ export default function AdminPage() {
     }
   };
 
-  const fetchBatches = async () => {
-    try {
-      const response = await fetch(`/api/admin/batches?t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-        },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setBatches(data.batches);
-      }
-    } catch (error) {
-      console.error('Error fetching batches:', error);
-    }
-  };
-
   const handleDelete = async (id: string, regNumber: string) => {
     if (!confirm(`Are you sure you want to delete registration ${regNumber}? This will free up the allocated slots.`)) {
       return;
@@ -168,10 +132,10 @@ export default function AdminPage() {
     }
   };
 
-  const handleCheckIn = async (regNumber: string, type: 'registration' | 'batch') => {
+  const handleCheckIn = async (regNumber: string) => {
     // If no password stored, prompt for it
     if (!adminPassword) {
-      setPendingCheckIn({ regNumber, type });
+      setPendingCheckIn({ regNumber, type: 'registration' });
       setShowPasswordPrompt(true);
       return;
     }
@@ -203,7 +167,6 @@ export default function AdminPage() {
         // Refresh data multiple times to ensure update
         await Promise.all([
           fetchRegistrations(),
-          fetchBatches(),
           fetchStats(),
         ]);
         
@@ -211,7 +174,6 @@ export default function AdminPage() {
         await new Promise(resolve => setTimeout(resolve, 500));
         await Promise.all([
           fetchRegistrations(),
-          fetchBatches(),
           fetchStats(),
         ]);
         
@@ -329,7 +291,6 @@ Report End
   useEffect(() => {
     fetchStats();
     fetchRegistrations();
-    fetchBatches();
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -341,25 +302,11 @@ Report End
     });
   };
 
-  // Get unique dates and times for filters
+  // Get unique dates for filters
   const uniqueDates = useMemo(() => {
     const dates = new Set(registrations.map(r => r.preferred_date));
     return Array.from(dates).sort();
   }, [registrations]);
-
-  const uniqueTimes = useMemo(() => {
-    const times = new Set<string>();
-    if (viewMode === 'batches') {
-      batches.forEach(b => times.add(b.slot_time));
-    } else {
-      registrations.forEach(r => {
-        if (r.slot_times) {
-          r.slot_times.split(', ').forEach(time => times.add(time));
-        }
-      });
-    }
-    return Array.from(times).sort();
-  }, [registrations, batches, viewMode]);
 
   // Filter registrations
   const filteredRegistrations = useMemo(() => {
@@ -370,9 +317,6 @@ Report End
 
       // Date filter
       if (filterDate !== 'all' && reg.preferred_date !== filterDate) return false;
-
-      // Time filter
-      if (filterTime !== 'all' && !reg.slot_times?.includes(filterTime)) return false;
 
       // Search filter
       if (searchQuery) {
@@ -386,7 +330,7 @@ Report End
 
       return true;
     });
-  }, [registrations, filterStatus, filterDate, filterTime, searchQuery]);
+  }, [registrations, filterStatus, filterDate, searchQuery]);
 
   // Stats for filtered results
   const filteredStats = useMemo(() => {
@@ -396,44 +340,6 @@ Report End
     
     return { completed, pending, total: filteredRegistrations.length, totalPeople };
   }, [filteredRegistrations]);
-
-  // Filter batches
-  const filteredBatches = useMemo(() => {
-    return batches.filter(batch => {
-      // Status filter
-      if (filterStatus === 'completed' && !batch.checked_in) return false;
-      if (filterStatus === 'pending' && batch.checked_in) return false;
-
-      // Date filter
-      if (filterDate !== 'all' && batch.slot_date !== filterDate) return false;
-
-      // Time filter
-      if (filterTime !== 'all' && batch.slot_time !== filterTime) return false;
-
-      // Language filter
-      if (filterLanguage !== 'all' && batch.language !== filterLanguage) return false;
-
-      // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        return (
-          batch.registration_number.toLowerCase().includes(query) ||
-          batch.church_name.toLowerCase().includes(query)
-        );
-      }
-
-      return true;
-    });
-  }, [batches, filterStatus, filterDate, filterTime, filterLanguage, searchQuery]);
-
-  // Stats for filtered batches
-  const filteredBatchStats = useMemo(() => {
-    const completed = filteredBatches.filter(b => b.checked_in).length;
-    const pending = filteredBatches.filter(b => !b.checked_in).length;
-    const totalPeople = filteredBatches.reduce((sum, b) => sum + b.people_count, 0);
-    
-    return { completed, pending, total: filteredBatches.length, totalPeople };
-  }, [filteredBatches]);
 
   const formatTime = (timeString: string) => {
     const [hours, minutes] = timeString.split(':');
@@ -629,51 +535,21 @@ Report End
           </div>
         </div>
 
-        {/* Batch/Registration View */}
+        {/* Registration View */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
           <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {viewMode === 'batches' ? 'Batch View' : 'Registration View'}
-                <span className="text-sm font-normal text-gray-500 ml-2">
-                  {viewMode === 'batches'
-                    ? `(${filteredBatchStats.total} of ${batches.length} batches)`
-                    : `(${filteredStats.total} of ${registrations.length} registrations)`
-                  }
-                </span>
-              </h2>
-              <div className="flex gap-2 border border-gray-300 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('batches')}
-                  className={`flex items-center gap-2 px-3 py-1 rounded transition-colors ${
-                    viewMode === 'batches'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <Layers className="w-4 h-4" />
-                  Batches
-                </button>
-                <button
-                  onClick={() => setViewMode('registrations')}
-                  className={`flex items-center gap-2 px-3 py-1 rounded transition-colors ${
-                    viewMode === 'registrations'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <List className="w-4 h-4" />
-                  Registrations
-                </button>
-              </div>
-            </div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Registration View
+              <span className="text-sm font-normal text-gray-500 ml-2">
+                ({filteredStats.total} of {registrations.length} registrations)
+              </span>
+            </h2>
             <div className="flex gap-2">
               <button
                 onClick={async () => {
                   setLoading(true);
                   await Promise.all([
                     fetchRegistrations(),
-                    fetchBatches(),
                     fetchStats(),
                   ]);
                   setLoading(false);
@@ -686,23 +562,17 @@ Report End
                 {loading ? 'Refreshing...' : 'Refresh'}
               </button>
               <button
-                onClick={() => {
-                  if (viewMode === 'batches') {
-                    setShowBatches(!showBatches);
-                  } else {
-                    setShowRegistrations(!showRegistrations);
-                  }
-                }}
+                onClick={() => setShowRegistrations(!showRegistrations)}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <List className="w-4 h-4" />
-                {(viewMode === 'batches' ? showBatches : showRegistrations) ? 'Hide' : 'Show'} List
+                {showRegistrations ? 'Hide' : 'Show'} List
               </button>
             </div>
           </div>
 
           {/* Filter Stats */}
-          {(showRegistrations || showBatches) && (
+          {showRegistrations && (
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-1">
@@ -710,7 +580,7 @@ Report End
                   <span className="font-semibold text-green-900">Completed</span>
                 </div>
                 <p className="text-2xl font-bold text-green-600">
-                  {viewMode === 'batches' ? filteredBatchStats.completed : filteredStats.completed}
+                  {filteredStats.completed}
                 </p>
               </div>
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -719,7 +589,7 @@ Report End
                   <span className="font-semibold text-yellow-900">Pending</span>
                 </div>
                 <p className="text-2xl font-bold text-yellow-600">
-                  {viewMode === 'batches' ? filteredBatchStats.pending : filteredStats.pending}
+                  {filteredStats.pending}
                 </p>
               </div>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -728,14 +598,14 @@ Report End
                   <span className="font-semibold text-blue-900">Total People</span>
                 </div>
                 <p className="text-2xl font-bold text-blue-600">
-                  {viewMode === 'batches' ? filteredBatchStats.totalPeople : filteredStats.totalPeople}
+                  {filteredStats.totalPeople}
                 </p>
               </div>
             </div>
           )}
 
           {/* Filters */}
-          {(showRegistrations || showBatches) && (
+          {showRegistrations && (
             <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex items-center gap-2 mb-4">
                 <Filter className="w-5 h-5 text-gray-600" />
@@ -791,33 +661,14 @@ Report End
                   </select>
                 </div>
 
-                {/* Time Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Time Slot
-                  </label>
-                  <select
-                    value={filterTime}
-                    onChange={(e) => setFilterTime(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="all">All Times</option>
-                    {uniqueTimes.map(time => (
-                      <option key={time} value={time}>
-                        {time}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
 
               {/* Clear Filters */}
-              {(filterStatus !== 'all' || filterDate !== 'all' || filterTime !== 'all' || searchQuery) && (
+              {(filterStatus !== 'all' || filterDate !== 'all' || searchQuery) && (
                 <button
                   onClick={() => {
                     setFilterStatus('all');
                     setFilterDate('all');
-                    setFilterTime('all');
                     setSearchQuery('');
                   }}
                   className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -828,81 +679,8 @@ Report End
             </div>
           )}
 
-          {/* Batch View Table */}
-          {showBatches && viewMode === 'batches' && (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Batch #</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Church</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Time</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Language</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">People</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Reg #</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredBatches.map((batch) => (
-                    <tr key={`${batch.registration_id}-${batch.group_sequence}`} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4">
-                        {batch.checked_in ? (
-                          <div className="flex items-center gap-1 text-green-600">
-                            <CheckCircle className="w-4 h-4" />
-                            <span className="text-xs font-medium">Completed</span>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleCheckIn(batch.registration_number, 'batch')}
-                            disabled={checkingIn === batch.registration_number}
-                            className="flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 disabled:opacity-50 transition-colors"
-                          >
-                            <Check className="w-4 h-4" />
-                            <span className="text-xs font-medium">
-                              {checkingIn === batch.registration_number ? 'Checking...' : 'Mark Done'}
-                            </span>
-                          </button>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold">
-                          {batch.group_sequence}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 font-medium">{batch.church_name}</td>
-                      <td className="py-3 px-4">{formatDate(batch.slot_date)}</td>
-                      <td className="py-3 px-4">
-                        <span className="font-semibold text-blue-600">{formatTime(batch.slot_time)}</span>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className={`inline-block px-2 py-1 rounded text-xs font-medium capitalize ${
-                          batch.language === 'tamil'
-                            ? 'bg-orange-100 text-orange-700'
-                            : 'bg-purple-100 text-purple-700'
-                        }`}>
-                          {batch.language}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center font-semibold">{batch.people_count}</td>
-                      <td className="py-3 px-4 font-mono text-xs text-gray-600">{batch.registration_number}</td>
-                    </tr>
-                  ))}
-                  {filteredBatches.length === 0 && (
-                    <tr>
-                      <td colSpan={8} className="py-8 text-center text-gray-500">
-                        {batches.length === 0 ? 'No batches found' : 'No batches match the selected filters'}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-
           {/* Registration View Table */}
-          {showRegistrations && viewMode === 'registrations' && (
+          {showRegistrations && (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -929,7 +707,7 @@ Report End
                           </div>
                         ) : (
                           <button
-                            onClick={() => handleCheckIn(reg.registration_number, 'registration')}
+                            onClick={() => handleCheckIn(reg.registration_number)}
                             disabled={checkingIn === reg.registration_number}
                             className="flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 disabled:opacity-50 transition-colors"
                           >
@@ -964,7 +742,7 @@ Report End
                         <div className="flex gap-2 justify-center">
                           {!reg.checked_in && (
                             <button
-                              onClick={() => handleCheckIn(reg.registration_number, 'registration')}
+                              onClick={() => handleCheckIn(reg.registration_number)}
                               disabled={checkingIn === reg.registration_number}
                               className="inline-flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 transition-colors text-sm"
                             >
