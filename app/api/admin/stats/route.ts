@@ -18,6 +18,21 @@ export async function GET() {
       FROM registrations`
     );
 
+    // Get visitor type statistics
+    const visitorStats = await query<{
+      visitor_type: string;
+      total_visitors: number;
+      percentage: number;
+    }>(
+      `SELECT
+        COALESCE(visitor_type, 'adventist') as visitor_type,
+        COALESCE(SUM(total_people), 0) as total_visitors,
+        ROUND(COALESCE(SUM(total_people), 0) * 100.0 / NULLIF((SELECT SUM(total_people) FROM registrations), 0), 1) as percentage
+      FROM registrations
+      GROUP BY visitor_type
+      ORDER BY total_visitors DESC`
+    );
+
     // Get slot statistics
     const slotStats = await query<{
       total_capacity: number;
@@ -75,6 +90,7 @@ export async function GET() {
             ? ((slotStats[0].filled_capacity / slotStats[0].total_capacity) * 100).toFixed(1)
             : 0,
         },
+        visitorStats,
         dateBreakdown,
       },
       {

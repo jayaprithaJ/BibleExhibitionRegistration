@@ -47,6 +47,12 @@ interface Batch {
   checked_in_at: string | null;
 }
 
+interface VisitorStats {
+  visitor_type: string;
+  total_visitors: number;
+  percentage: number;
+}
+
 export default function AdminPage() {
   const [stats, setStats] = useState({
     totalRegistrations: 0,
@@ -57,6 +63,7 @@ export default function AdminPage() {
     availableCapacity: 0,
     fillPercentage: 0,
   });
+  const [visitorStats, setVisitorStats] = useState<VisitorStats[]>([]);
   const [dateBreakdown, setDateBreakdown] = useState<DateBreakdown[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
@@ -89,6 +96,7 @@ export default function AdminPage() {
       const data = await response.json();
       if (data.success) {
         setStats(data.stats);
+        setVisitorStats(data.visitorStats || []);
         setDateBreakdown(data.dateBreakdown);
       }
     } catch (error) {
@@ -461,52 +469,6 @@ Report End
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="flex items-center justify-between mb-4">
-              <Users className="w-8 h-8 text-blue-600" />
-              <span className="text-sm text-gray-500">Total</span>
-            </div>
-            <p className="text-3xl font-bold text-gray-900">{stats.totalRegistrations}</p>
-            <p className="text-sm text-gray-600 mt-1">Total Registrations</p>
-            <p className="text-xs text-gray-500 mt-1">{stats.totalPeople} people</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="flex items-center justify-between mb-4">
-              <Calendar className="w-8 h-8 text-green-600" />
-              <span className="text-sm text-gray-500">Today</span>
-            </div>
-            <p className="text-3xl font-bold text-gray-900">{stats.todayRegistrations}</p>
-            <p className="text-sm text-gray-600 mt-1">People Registered Today</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="flex items-center justify-between mb-4">
-              <TrendingUp className="w-8 h-8 text-purple-600" />
-              <span className="text-sm text-gray-500">Filled</span>
-            </div>
-            <p className="text-3xl font-bold text-gray-900">
-              {stats.fillPercentage}%
-            </p>
-            <p className="text-sm text-gray-600 mt-1">
-              {stats.filledCapacity} / {stats.totalCapacity}
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="flex items-center justify-between mb-4">
-              <Clock className="w-8 h-8 text-orange-600" />
-              <span className="text-sm text-gray-500">Available</span>
-            </div>
-            <p className="text-3xl font-bold text-gray-900">
-              {stats.availableCapacity}
-            </p>
-            <p className="text-sm text-gray-600 mt-1">Spots Remaining</p>
-          </div>
-        </div>
-
         {/* Exhibition Report */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
           <div className="flex justify-between items-center mb-6">
@@ -604,43 +566,66 @@ Report End
           {/* Visitor Statistics */}
           <div>
             <h3 className="text-xl font-bold text-gray-900 mb-4 border-b-2 border-purple-500 pb-2">
-              Visitor Statistics (Till Friday)
+              Visitor Statistics
             </h3>
             <div className="grid md:grid-cols-3 gap-6 mb-4">
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
                 <p className="text-sm text-gray-600 mb-2">Total Visitors</p>
-                <p className="text-4xl font-bold text-purple-600">2,824</p>
+                <p className="text-4xl font-bold text-purple-600">
+                  {stats.totalPeople.toLocaleString()}
+                </p>
               </div>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <p className="text-sm text-gray-600 mb-2">Adventist (incl. school)</p>
-                <p className="text-4xl font-bold text-green-600">2,655</p>
-                <p className="text-xs text-gray-500 mt-1">94.0%</p>
-              </div>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                <p className="text-sm text-gray-600 mb-2">Non-Adventist & Non-believers</p>
-                <p className="text-4xl font-bold text-yellow-600">169</p>
-                <p className="text-xs text-gray-500 mt-1">6.0%</p>
-              </div>
+              {visitorStats.map((stat, index) => (
+                <div
+                  key={stat.visitor_type}
+                  className={`${
+                    stat.visitor_type === 'adventist'
+                      ? 'bg-green-50 border-green-200'
+                      : 'bg-yellow-50 border-yellow-200'
+                  } border rounded-lg p-6`}
+                >
+                  <p className="text-sm text-gray-600 mb-2">
+                    {stat.visitor_type === 'adventist'
+                      ? 'Adventist (incl. school)'
+                      : 'Non-Adventist & Non-believers'}
+                  </p>
+                  <p className={`text-4xl font-bold ${
+                    stat.visitor_type === 'adventist' ? 'text-green-600' : 'text-yellow-600'
+                  }`}>
+                    {stat.total_visitors.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{stat.percentage}%</p>
+                </div>
+              ))}
             </div>
             
             {/* Visitor Breakdown Chart */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <p className="text-sm font-medium text-gray-700 mb-3">Visitor Breakdown</p>
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
-                    <div className="bg-green-500 h-8 flex items-center justify-center text-white text-sm font-bold" style={{ width: '94%' }}>
-                      Adventist 94%
+            {visitorStats.length > 0 && (
+              <div className="bg-gray-50 rounded-lg p-6">
+                <p className="text-sm font-medium text-gray-700 mb-3">Visitor Breakdown</p>
+                <div className="flex gap-2">
+                  {visitorStats.map((stat, index) => (
+                    <div
+                      key={stat.visitor_type}
+                      style={{ width: `${stat.percentage}%` }}
+                    >
+                      <div className={`w-full ${
+                        stat.visitor_type === 'adventist' ? 'bg-green-500' : 'bg-yellow-500'
+                      } rounded-full h-8 flex items-center justify-center text-white text-sm font-bold`}>
+                        {stat.percentage >= 10 && (
+                          <span>
+                            {stat.visitor_type === 'adventist' ? 'Adventist' : 'Non-Adventist'} {stat.percentage}%
+                          </span>
+                        )}
+                        {stat.percentage < 10 && stat.percentage >= 5 && (
+                          <span>{stat.percentage}%</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div style={{ width: '6%' }}>
-                  <div className="w-full bg-yellow-500 rounded-full h-8 flex items-center justify-center text-white text-xs font-bold">
-                    6%
-                  </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
