@@ -420,7 +420,7 @@ Report End
             <h3 className="text-xl font-bold text-gray-900 mb-4 border-b-2 border-blue-500 pb-2">
               Registration Statistics
             </h3>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                 <p className="text-sm text-gray-600 mb-2">URL Registrations</p>
                 <p className="text-4xl font-bold text-blue-600">{stats.urlPeople.toLocaleString()}</p>
@@ -430,11 +430,6 @@ Report End
                 <p className="text-sm text-gray-600 mb-2">QR Code Registrations</p>
                 <p className="text-4xl font-bold text-purple-600">{stats.qrPeople.toLocaleString()}</p>
                 <p className="text-xs text-gray-500 mt-1">People registered via QR code</p>
-              </div>
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
-                <p className="text-sm text-gray-600 mb-2">Spot/Walk-in Registrations</p>
-                <p className="text-4xl font-bold text-orange-600">{stats.spotPeople.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-1">People registered on-site</p>
               </div>
             </div>
           </div>
