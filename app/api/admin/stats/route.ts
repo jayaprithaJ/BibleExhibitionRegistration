@@ -18,13 +18,15 @@ export async function GET() {
       FROM registrations`
     );
 
-    // Get URL registrations (people count)
+    // Get URL registrations (people count) - standard BE-XXXX format only
     const urlStats = await query<{
       total_people: number;
     }>(
       `SELECT COALESCE(SUM(total_people), 0) as total_people
        FROM registrations
-       WHERE registration_number LIKE 'BE-%' AND registration_number NOT LIKE '%QR%'`
+       WHERE registration_number LIKE 'BE-%'
+         AND registration_number NOT LIKE '%QR%'
+         AND registration_number NOT LIKE 'BE-SPOT-%'`
     );
 
     // Get QR registrations (people count, not registration count)
