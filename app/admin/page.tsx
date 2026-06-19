@@ -46,7 +46,8 @@ export default function AdminPage() {
     todayRegistrations: 0,
     totalPeople: 0,
     urlPeople: 0,
-    qrRegistrationCount: 0,
+    qrPeople: 0,
+    spotPeople: 0,
     totalCapacity: 0,
     filledCapacity: 0,
     availableCapacity: 0,
@@ -310,9 +311,9 @@ Report End
     return Array.from(dates).sort();
   }, [registrations]);
 
-  // Filter registrations
+  // Filter and sort registrations
   const filteredRegistrations = useMemo(() => {
-    return registrations.filter(reg => {
+    const filtered = registrations.filter(reg => {
       // Status filter
       if (filterStatus === 'completed' && !reg.checked_in) return false;
       if (filterStatus === 'pending' && reg.checked_in) return false;
@@ -332,15 +333,34 @@ Report End
 
       return true;
     });
+
+    // Sort: pending first, then by date descending
+    return filtered.sort((a, b) => {
+      // First, sort by status (pending first)
+      if (a.checked_in !== b.checked_in) {
+        return a.checked_in ? 1 : -1;
+      }
+      // Then sort by date descending (newest first)
+      return new Date(b.preferred_date).getTime() - new Date(a.preferred_date).getTime();
+    });
   }, [registrations, filterStatus, filterDate, searchQuery]);
 
   // Stats for filtered results
   const filteredStats = useMemo(() => {
-    const completed = filteredRegistrations.filter(r => r.checked_in).length;
-    const pending = filteredRegistrations.filter(r => !r.checked_in).length;
+    const completedPeople = filteredRegistrations
+      .filter(r => r.checked_in)
+      .reduce((sum, r) => sum + r.total_people, 0);
+    const pendingPeople = filteredRegistrations
+      .filter(r => !r.checked_in)
+      .reduce((sum, r) => sum + r.total_people, 0);
     const totalPeople = filteredRegistrations.reduce((sum, r) => sum + r.total_people, 0);
     
-    return { completed, pending, total: filteredRegistrations.length, totalPeople };
+    return {
+      completed: completedPeople,
+      pending: pendingPeople,
+      total: filteredRegistrations.length,
+      totalPeople
+    };
   }, [filteredRegistrations]);
 
   const formatTime = (timeString: string) => {
@@ -400,16 +420,21 @@ Report End
             <h3 className="text-xl font-bold text-gray-900 mb-4 border-b-2 border-blue-500 pb-2">
               Registration Statistics
             </h3>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <p className="text-sm text-gray-600 mb-2">People Registered via URL</p>
+                <p className="text-sm text-gray-600 mb-2">URL Registrations</p>
                 <p className="text-4xl font-bold text-blue-600">{stats.urlPeople.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-1">Total people count from URL registrations</p>
+                <p className="text-xs text-gray-500 mt-1">People registered via URL</p>
               </div>
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                <p className="text-sm text-gray-600 mb-2">QR Code Scans</p>
-                <p className="text-4xl font-bold text-purple-600">{stats.qrRegistrationCount.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-1">Number of QR code registrations</p>
+                <p className="text-sm text-gray-600 mb-2">QR Code Registrations</p>
+                <p className="text-4xl font-bold text-purple-600">{stats.qrPeople.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-1">People registered via QR code</p>
+              </div>
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                <p className="text-sm text-gray-600 mb-2">Spot/Walk-in Registrations</p>
+                <p className="text-4xl font-bold text-orange-600">{stats.spotPeople.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-1">People registered on-site</p>
               </div>
             </div>
           </div>

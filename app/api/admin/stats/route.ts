@@ -18,21 +18,31 @@ export async function GET() {
       FROM registrations`
     );
 
-    // Get URL registrations (people count) and QR registrations (registration count)
+    // Get URL registrations (people count)
     const urlStats = await query<{
       total_people: number;
     }>(
       `SELECT COALESCE(SUM(total_people), 0) as total_people
        FROM registrations
-       WHERE registration_number NOT LIKE '%QR%'`
+       WHERE registration_number LIKE 'BE-%' AND registration_number NOT LIKE '%QR%'`
     );
 
+    // Get QR registrations (people count, not registration count)
     const qrStats = await query<{
-      registration_count: number;
+      total_people: number;
     }>(
-      `SELECT COUNT(*) as registration_count
+      `SELECT COALESCE(SUM(total_people), 0) as total_people
        FROM registrations
        WHERE registration_number LIKE '%QR%'`
+    );
+
+    // Get Spot/Walk-in registrations (people count)
+    const spotStats = await query<{
+      total_people: number;
+    }>(
+      `SELECT COALESCE(SUM(total_people), 0) as total_people
+       FROM registrations
+       WHERE registration_number LIKE 'BE-SPOT-%'`
     );
 
     // Get visitor type statistics
@@ -101,7 +111,8 @@ export async function GET() {
           todayRegistrations: registrationStats[0].today_people,
           totalPeople: registrationStats[0].total_people,
           urlPeople: urlStats[0].total_people,
-          qrRegistrationCount: qrStats[0].registration_count,
+          qrPeople: qrStats[0].total_people,
+          spotPeople: spotStats[0].total_people,
           totalCapacity: slotStats[0].total_capacity,
           filledCapacity: slotStats[0].filled_capacity,
           availableCapacity: slotStats[0].available_capacity,
